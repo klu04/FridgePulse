@@ -1,0 +1,2 @@
+class BarcodeAlreadyExistsError(Exception):
+    pass
