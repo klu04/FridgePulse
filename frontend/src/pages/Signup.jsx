@@ -34,7 +34,7 @@ function SignUp() {
             console
             await register({ name: name || null, email, password });
             await login({ email, password });
-            navigate("/");
+            navigate("/dashboard");
         } catch (err) {
             console.error(err)
             alert(err.message)

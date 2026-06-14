@@ -19,7 +19,7 @@ function Login() {
     async function handleSubmit(event) {
         event.preventDefault();
         await login({ email, password })
-        navigate("/")
+        navigate("/dashboard")
     }
 
     return (

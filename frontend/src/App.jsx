@@ -1,12 +1,12 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Dashboard from './pages/Dashboard';
 import AddItem from './pages/AddItem';
-import Navbar from '@/components/ui/navbar'
 import AllItems from './pages/AllItems';
 import Recipes from './pages/Recipes';
 import SavedRecipes from './pages/SavedRecipes';
 import Reports from './pages/Reports';
-import LoginPage from './pages/LoginPage';
+import Login from './pages/Login';
+import SignUp from './pages/Signup';
 import BarcodeScanner from './pages/BarcodeScanner';
 import ObjectScanner from './pages/ObjectScanner';
 import LandingPage from './pages/LandingPage';
@@ -28,7 +28,8 @@ function App() {
             <Route path="/savedrecipes" element={<SavedRecipes />} />
             <Route path="/reports" element={<Reports />} />
           </Route>
-          <Route path="/loginpage" element={<LoginPage />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<SignUp/>} />
         </Routes>
       </div>
     </BrowserRouter>

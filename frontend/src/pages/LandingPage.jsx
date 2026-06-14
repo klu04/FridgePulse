@@ -1,14 +1,55 @@
 import { Refrigerator } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import Header from "@/components/ui/Header";
-import { Card, CardHeader, CardTitle } from "@/components/ui/card"
+import Header from "@/components/commonUI/Header";
+import {
+    Item,
+    ItemContent,
+    ItemDescription,
+    ItemGroup,
+    ItemHeader,
+    ItemTitle,
+} from "@/components/ui/item"
+
+const features = [
+    {
+        name: "Pantry Management",
+        description: "Add, update, and delete pantry items with details like brand, category, quantity, and expiration date",
+        image: "https://img.icons8.com/?size=100&id=qK8WL0EIVmrw&format=png&color=000000"
+    },
+    {
+        name: "Barcode Scanning",
+        description: "Scan product barcodes with your camera to auto-populate item details via the Open Food Facts API",
+        image: "https://img.icons8.com/?size=100&id=9hZVoio3Prjv&format=png&color=000000"
+    },
+    {
+        name: "Food Recognition",
+        description: "Identify fruits and vegetables using a ML model through your device camera",
+        image: "https://img.icons8.com/?size=100&id=feS2IHYk2ga4&format=png&color=000000"
+    },
+    {
+        name: "Recipe Suggestions",
+        description: "Get recipe ideas based on items expiring within 3 days (powered by Spoonacular API)",
+        image: "https://img.icons8.com/?size=100&id=AXKi0XGZeq0Z&format=png&color=000000"
+    },
+    {
+        name: "Usage Reports",
+        description: "Track consumption patterns and food waste analytics",
+        image: "https://img.icons8.com/?size=100&id=EUisNPir8iLD&format=png&color=000000"
+    },
+    {
+        name: "PWA Support",
+        description: " Installable as a progressive web app to use as a native mobile app",
+        image: "https://img.icons8.com/?size=100&id=FRuHh0dWfr9w&format=png&color=000000"
+    }
+]
 
 function LandingPage() {
     return (
-        <div className="flex flex-col justify-center mx-auto w-full max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-0 lg:min-h-dvh">
+        <div className="flex flex-col justify-center mx-auto w-full max-w-4xl px-6 py-20 lg:min-h-dvh">
             {/* Hero */}
-            <div className="flex flex-col gap-8 items-center flex-center justify-center">
+            <div className="flex flex-col gap-5 items-center flex-center justify-center">
+
                 <div className="flex flex-col gap-8 items-center flex-1">
                     <Refrigerator className="size-15 w-25 text-gray-600" />
                     <h1 className="text-center text-2xl font-bold text-gray-600">
@@ -18,21 +59,34 @@ function LandingPage() {
                         Track your groceries and reduce food waste!
                     </p>
                     <div className="flex flex-row gap-4">
-                        <div className="flex flex-row gap-4">
-                            <Link to="/login">
-                                <Button variant="outline" size="lg">Log In</Button>
-                            </Link>
-                            <Link to="/">
-                                <Button variant="outline" size="lg">Sign Up</Button>
-                            </Link>
-                        </div>
+                        <Link to="/login">
+                            <Button variant="outline" size="lg">Log In</Button>
+                        </Link>
+                        <Link to="/signup">
+                            <Button variant="outline" size="lg">Sign Up</Button>
+                        </Link>
                     </div>
                 </div>
-                <div className="gap-16 mt-5">
-                    <Header />
-                    <div className="flex-col md:flex-row gap-8 items-stretch">
-                        <Card></Card>
-                    </div>
+
+                <div className="flex flex-col">
+                    <Header title="Features" />
+                    <ItemGroup className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {features.map((feature) => (
+                            <Item key={feature.name} variant="muted" className="p-6 items-start content-start">
+                                <ItemHeader className="mb-2">
+                                    <img
+                                        src={feature.image}
+                                        alt={feature.name}
+                                        className="w-14 h-14 rounded-sm object-cover"
+                                    />
+                                </ItemHeader>
+                                <ItemContent>
+                                    <ItemTitle>{feature.name}</ItemTitle>
+                                    <ItemDescription className="line-clamp-none">{feature.description}</ItemDescription>
+                                </ItemContent>
+                            </Item>
+                        ))}
+                    </ItemGroup>
                 </div>
             </div>
         </div>
