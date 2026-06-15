@@ -56,7 +56,7 @@ export function useAuth() {
         const res = await fetch(`${API_BASE}/v1/users`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name, email_address: email, password }),
+            body: JSON.stringify({ name, email, password }),
         });
 
         if (!res.ok) {
@@ -68,7 +68,7 @@ export function useAuth() {
             throw new Error(message);
         }
 
-        return res.json(); // { id, name, email_address }
+        return res.json(); // { id, name, email }
     };
 
     const logout = () => {
