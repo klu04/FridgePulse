@@ -1,8 +1,33 @@
+import { LogOut } from "lucide-react";
+import { useAuth } from "@/lib/useAuth";
+import { Button } from "@/components/ui/button";
 
-const Header = ({title}) => {
+const Header = () => {
+    const { logout, user } = useAuth();
+
     return (
-        <header className='bg-white py-8'>
-            <h1 className="text-xl font-bold text-gray-600 text-center">{title}</h1>
+        <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
+            <div className="flex h-14 items-center justify-between px-4">
+
+                <h1 className="text-lg font-bold tracking-tight">ShelfLife</h1>
+
+                <div className="flex items-center gap-2">
+                    {user?.email && (
+                        <span className="hidden text-sm text-muted-foreground sm:inline-block">
+                            {user.email}
+                        </span>
+                    )}
+
+                    <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={logout}
+                        aria-label="Log out"
+                    >
+                        <LogOut className="h-5 w-5" />
+                    </Button>
+                </div>
+            </div>
         </header>
     );
 }
