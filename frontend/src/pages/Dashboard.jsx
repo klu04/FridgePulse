@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card"
 import { daysUntilExpiry, ExpiryBadge, rowColor } from "@/lib/expiry";
 import { FOOD_ITEMS_URL, RECIPES_URL } from "@/lib/api";
-import { useAuth } from "@/lib/useAuth"
+import { useAuth } from "@/hooks/useAuth";
 import { apiFetch } from "@/lib/api"
 
 const mockRecipes = [

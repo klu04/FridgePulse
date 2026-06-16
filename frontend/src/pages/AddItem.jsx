@@ -7,7 +7,7 @@ import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { FOOD_ITEMS_URL } from "@/lib/api";
-import { useAuth } from "@/lib/useAuth"
+import { useAuth } from "@/hooks/useAuth";
 import { apiFetch } from "@/lib/api"
 
 const CATEGORIES = [

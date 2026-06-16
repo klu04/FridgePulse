@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Refrigerator } from "lucide-react";
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { useAuth } from "@/lib/useAuth"
+import { useAuth } from "@/hooks/useAuth"
 import { useNavigate } from "react-router-dom"
 import { Link } from "react-router-dom"
 

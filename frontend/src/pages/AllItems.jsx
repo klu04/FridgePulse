@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ExpiryBadge, rowColor } from "@/lib/expiry";
 import { FOOD_ITEMS_URL, apiFetch } from "@/lib/api";
-import { useAuth } from "@/lib/useAuth"
+import { useAuth } from "@/hooks/useAuth";
 
 const CATEGORIES = [
   "Dairy", "Bakery", "Produce", "Seafood", "Meat",

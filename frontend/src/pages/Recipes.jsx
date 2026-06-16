@@ -9,9 +9,9 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button"
-import { Card, CardAction, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { RECIPES_URL, apiFetch } from "@/lib/api";
-import { useAuth } from "@/lib/useAuth"
+import { useAuth } from "@/hooks/useAuth"
 
 const mockRecipes = [
     {id: 1, title: "Salmon Alfredo", image: null},

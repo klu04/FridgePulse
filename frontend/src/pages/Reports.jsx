@@ -16,7 +16,7 @@ import {
     REPORTS_FREQUENTLY_WASTED_URL,
     REPORTS_UNUSED_URL,
 } from "@/lib/api"
-import { useAuth } from "@/lib/useAuth"
+import { useAuth } from "@/hooks/useAuth"
 import { apiFetch } from "@/lib/api"
 
 // Displays a list of the items within each report
