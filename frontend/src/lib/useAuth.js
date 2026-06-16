@@ -1,6 +1,3 @@
-// Name: Paula Tica
-// Date: 05/23/2026
-
 import { useState, useEffect } from "react";
 import { API_BASE } from "./api"; // adjust path as needed
 
