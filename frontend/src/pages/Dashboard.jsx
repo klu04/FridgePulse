@@ -132,7 +132,7 @@ function Dashboard() {
                         <h2 className="text-lg md:text-2xl font-semibold text-gray-900">Expiring Soon</h2>
                         <p className="text-xs md:text-sm text-red-500">Expiring within 3 days or already expired</p>
                     </div>
-                    <Link to="/all_items">
+                    <Link to="/all-items">
                         <Button variant="outline" size="sm">View All</Button>
                     </Link>
                 </div>
@@ -147,7 +147,7 @@ function Dashboard() {
                         <Link to="/additem">
                             <Button variant="outline" size="sm">Add Item</Button>
                         </Link>
-                        <Link to="/all_items">
+                        <Link to="/all-items">
                             <Button variant="outline" size="sm">View All</Button>
                         </Link>
                     </div>
