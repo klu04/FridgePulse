@@ -1,10 +1,15 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "@/lib/useAuth";
-const AuthGate = () => {
+
+export function AuthGate() {
     const { isAuthenticated } = useAuth();
-    if (!isAuthenticated) {
-        console.log("Unauthenticated, redirecting to login")
+    
+    const isLoggedIn = isAuthenticated();
+
+    if (!isLoggedIn) {
+        console.log("Unauthenticated, redirecting to login");
+        return <Navigate to="/login" replace />;
     }
-    return isAuthenticated() ? <Outlet /> : <Navigate to="/login" replace />;
+
+    return <Outlet />;
 }
-export default AuthGate;
