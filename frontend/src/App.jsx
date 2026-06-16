@@ -10,26 +10,36 @@ import SignUp from './pages/Signup';
 import BarcodeScanner from './pages/BarcodeScanner';
 import ObjectScanner from './pages/ObjectScanner';
 import LandingPage from './pages/LandingPage';
-import { AuthGate } from './components/auth/AuthGate';
+import AuthGate from './components/auth/AuthGate';
+import AuthLayout from './components/layouts/AuthLayout';
+import GuestGate from './components/auth/GuestGate';
 
 function App() {
   return (
     <BrowserRouter>
-      <div className="flex">
+      <div className="flex flex-col min-h-screen w-full">
         <Routes>
-          <Route index element={<LandingPage />} />
-          <Route element={<AuthGate />}>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/additem" element={<AddItem />} />
-            <Route path="/scan-barcode" element={<BarcodeScanner />} />
-            <Route path="/scan-object" element={<ObjectScanner />} />
-            <Route path="/all_items" element={<AllItems />} />
-            <Route path="/recipes" element={<Recipes />} />
-            <Route path="/savedrecipes" element={<SavedRecipes />} />
-            <Route path="/reports" element={<Reports />} />
+
+          <Route element={<GuestGate />}>
+            <Route index element={<LandingPage />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<SignUp />} />
           </Route>
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<SignUp/>} />
+
+
+          <Route element={<AuthGate />}>
+            <Route element={<AuthLayout />}>
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/add-item" element={<AddItem />} />
+              <Route path="/scan-barcode" element={<BarcodeScanner />} />
+              <Route path="/scan-object" element={<ObjectScanner />} />
+              <Route path="/all-items" element={<AllItems />} />
+              <Route path="/recipes" element={<Recipes />} />
+              <Route path="/saved-recipes" element={<SavedRecipes />} />
+              <Route path="/reports" element={<Reports />} />
+            </Route>
+          </Route>
+
         </Routes>
       </div>
     </BrowserRouter>
