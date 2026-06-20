@@ -4,12 +4,18 @@ import { API_BASE } from "@/lib/api";
 let listeners = [];
 let state = {
     user: JSON.parse(localStorage.getItem("user")),
-    token: localStorage.getItem("token"),
+    token: localStorage.getItem("access_token"),
 };
 
 function setState(newState) {
     state = { ...state, ...newState };
     listeners.forEach((l) => l(state));
+}
+
+export function clearAuth() {
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("user");
+    setState({ token: null, user: null });
 }
 
 export function useAuth() {
@@ -27,7 +33,7 @@ export function useAuth() {
             password,
         });
 
-        const res = await fetch(`${API_BASE}/v1/tokens`, {
+        const res = await fetch(`${API_BASE}/api/v1/tokens`, {
             method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
             body,
@@ -44,13 +50,13 @@ export function useAuth() {
         // or decode the JWT. For now we store email as a lightweight user object.
         const user = { email };
 
-        localStorage.setItem("token", access_token);
+        localStorage.setItem("access_token", access_token);
         localStorage.setItem("user", JSON.stringify(user));
         setState({ token: access_token, user });
     };
 
     const register = async ({ name, email, password }) => {
-        const res = await fetch(`${API_BASE}/v1/users`, {
+        const res = await fetch(`${API_BASE}/api/v1/users`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ name, email, password }),
@@ -69,12 +75,11 @@ export function useAuth() {
     };
 
     const logout = () => {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-        setState({ token: null, user: null });
+        clearAuth();
     };
 
     const isAuthenticated = () => !!state.token;
 
     return { login, register, logout, isAuthenticated, user: state.user, token: state.token };
 }
+
