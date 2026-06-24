@@ -14,7 +14,10 @@ trustPolicyExclude:
 allowBuilds:
   esbuild: true
   msw: false
+  onnxruntime-node: false
+  protobufjs: false
   rolldown: true
+  sharp: false
   unrs-resolver: true
 
 # SECURITY: fail the install if a dependency wants to run a build

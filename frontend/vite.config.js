@@ -20,6 +20,8 @@ export default defineConfig({
         theme_color: "#ffffff",
         background_color: "#ffffff",
         display: "standalone",
+        start_url: "/", 
+        id: "/",   
         icons: [
           {
             src: "/pwa-192x192.png",
@@ -47,6 +49,23 @@ export default defineConfig({
           },
         ],
       },
+      workbox: {
+
+        maximumFileSizeToCacheInBytes: 100 * 1024 * 1024, 
+        runtimeCaching: [
+          {
+            urlPattern: ({ url }) => url.hostname.includes('huggingface.co'),
+            handler: 'CacheFirst',
+            options: { 
+              cacheName: 'hf-models-cache',
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 24 * 365
+              }
+            }
+          }
+        ]
+      }
     }),
   ],
   resolve: {
@@ -54,4 +73,20 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  optimizeDeps: { exclude: ['@huggingface/transformers'] },
+  server: {
+    allowedHosts: ['dosage-matchless-suspend.ngrok-free.dev'],
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
+    },
+    headers: {
+      'Cross-Origin-Opener-Policy': 'same-origin',
+      'Cross-Origin-Embedder-Policy': 'credentialless', 
+    },
+    host: true,
+
+  }
 });
