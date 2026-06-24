@@ -11,7 +11,7 @@ import {
 
 const left_nav = [
     { to: "/dashboard", label: "Home", Icon: Home, end: true },
-    { to: "/all-items", label: "Pantry", Icon: Refrigerator },
+    { to: "/all-items", label: "Kitchen", Icon: Refrigerator },
 ];
 
 const right_nav = [
@@ -20,6 +20,7 @@ const right_nav = [
 ];
 
 function NavLink({ to, label, Icon, end, pathname }) {
+    
     const isActive = end
         ? pathname === to
         : pathname === to || pathname.startsWith(`${to}/`);
@@ -54,6 +55,9 @@ function NavLink({ to, label, Icon, end, pathname }) {
 
 const BottomNav = ({ className }) => {
     const { pathname } = useLocation();
+
+    // Disable bottom nav in scanning mode
+    if (pathname === "/scan-object" || pathname === "/scan-barcode") return null;
 
     return (
         <nav

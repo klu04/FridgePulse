@@ -10,7 +10,8 @@ export const REPORTS_UNUSED_URL = `${API_BASE}/api/v1/reports/unused`;
 
 let isRedirecting = false;
 
-export async function apiFetch(url, token, options = {}) {
+export async function apiFetch(url, options = {}) {
+    const token = localStorage.getItem("access_token")
     const res = await fetch(url, {
         ...options,
         headers: {

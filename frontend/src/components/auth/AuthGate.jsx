@@ -13,3 +13,4 @@ export function AuthGate() {
 
     return <Outlet />;
 }
+export default AuthGate;
