@@ -1,22 +1,37 @@
-from pydantic import BaseModel, Field
+from uuid import UUID
+
+from pydantic import BaseModel, ConfigDict, Field
 
 
-class RecipeCreate(BaseModel):
-    id: str | None = Field(None)
-    title: str | None = Field(None, max_length=50)
-    description: str | None = Field(None, max_length=2000)
+class RecipeBase(BaseModel):
+    recipe_id: int = Field(..., description="Spoonacular recipe ID")
+    name: str | None = Field(None, max_length=500)
     image_url: str | None = Field(None)
-    source_url: str | None = Field(None)
-    recipe_ingredients: list[str]
 
 
-class RecipeResponse(BaseModel):
-    title: str | None = Field(None, max_length=50)
-    description: str | None = Field(None, max_length=2000)
+class RecipeCreate(RecipeBase):
+    pass
+
+
+class RecipeUpdate(BaseModel):
+    name: str | None = Field(None, max_length=500)
     image_url: str | None = Field(None)
-    source_url: str | None = Field(None)
-    recipe_ingredients: list[str]
 
 
-class RecipeListResponse(BaseModel):
-    recipes: list[RecipeResponse]
+class RecipeResponse(RecipeBase):
+    model_config = ConfigDict(from_attributes=True)
+    id: UUID
+    user_id: UUID
+
+
+class RecipeSuggestion(BaseModel):
+    """For live API results - no id/user_id"""
+
+    recipe_id: int
+    name: str | None = None
+    image_url: str | None = None
+    source_url: str | None = None
+
+
+class RecipeSuggestionListResponse(BaseModel):
+    recipes: list[RecipeSuggestion]
