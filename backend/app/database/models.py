@@ -5,6 +5,7 @@ from uuid import UUID
 
 import sqlalchemy
 from sqlalchemy import (
+    BigInteger,
     Boolean,
     DateTime,
     ForeignKey,
@@ -54,13 +55,14 @@ class FoodItem(Base):
         sqlalchemy.Numeric(6, 2), nullable=False, default=Decimal("1.00")
     )
     unit: Mapped[str | None] = mapped_column(String(30))
+    image_url: Mapped[str | None] = mapped_column(Text)
     expiration_date: Mapped[datetime.date | None] = mapped_column(sqlalchemy.Date)
     created_at: Mapped[datetime.datetime] = mapped_column(
         DateTime(timezone=True), server_default=text("now()"), nullable=False
     )
 
     # Ensure uniqueness so no same barcode is added twice.
-    __table_args__ = (UniqueConstraint("user_id", "barcode", name="user_barcode"),)
+    __table_args__ = (UniqueConstraint("user_id", "barcode", name="uq_user_barcode"),)
 
     owner: Mapped["User"] = relationship(back_populates="food_items")
 
@@ -85,13 +87,22 @@ class UsageLog(Base):
 
 class Recipe(Base):
     __tablename__ = "recipes"
+
     id: Mapped[UUID] = mapped_column(
         types.Uuid, primary_key=True, server_default=text("gen_random_uuid()")
     )
+
     user_id: Mapped[UUID] = mapped_column(
         types.Uuid, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
-    title: Mapped[str] = mapped_column(String(255), nullable=False)
-    description: Mapped[str | None] = mapped_column(String(2000))
+
+    recipe_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
+
+    name: Mapped[str] = mapped_column(String(500), nullable=False)
     image_url: Mapped[str | None] = mapped_column(Text)
-    source_url: Mapped[str | None] = mapped_column(Text)
+
+    saved_at: Mapped[datetime.datetime] = mapped_column(
+        DateTime(timezone=True), server_default=text("now()")
+    )
+
+    __table_args__ = (UniqueConstraint("user_id", "recipe_id", name="uq_user_recipe"),)
