@@ -1,16 +1,22 @@
 from datetime import date, timedelta
 from typing import Annotated
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth.services import CurrentUser
+from app.auth.utils import CurrentUser
 from app.database.db import get_db
 from app.database.models import FoodItem as FoodItemModel
 from app.database.models import Recipe as RecipeModel
-from app.external_api_services.recipe_api import get_recipes_from_ingredients
-from app.recipes.schema import RecipeCreate, RecipeListResponse, RecipeResponse
+from app.recipes.schema import (
+    RecipeCreate,
+    RecipeResponse,
+    RecipeSuggestionListResponse,
+    RecipeUpdate,
+)
+from app.recipes.utils import get_recipes_from_ingredients
 
 router = APIRouter()
 
@@ -26,7 +32,7 @@ def calculate_expiration(user_items):
     return food_items
 
 
-@router.get("/get-recipe-suggestions", response_model=RecipeListResponse)
+@router.get("/get-recipe-suggestions", response_model=RecipeSuggestionListResponse)
 async def get_recipe_suggestions(
     current_user: CurrentUser,
     db: Annotated[AsyncSession, Depends(get_db)],
@@ -39,9 +45,10 @@ async def get_recipe_suggestions(
 
     user_items = result.scalars().all()
     items_expiring_soon = calculate_expiration(user_items)
-    recipes = await get_recipes_from_ingredients(items_expiring_soon)
 
-    return {"recipes": recipes}
+    new_recipes = await get_recipes_from_ingredients(items_expiring_soon)
+
+    return RecipeSuggestionListResponse(recipes=new_recipes)
 
 
 @router.post("", response_model=RecipeResponse, status_code=status.HTTP_201_CREATED)
@@ -56,7 +63,7 @@ async def save_recipe(
     result = await db.execute(
         select(RecipeModel).where(
             RecipeModel.user_id == current_user.id,
-            RecipeModel.title == recipe_data.title,
+            RecipeModel.recipe_id == recipe_data.recipe_id,
         )
     )
     if result.scalar_one_or_none():
@@ -64,23 +71,34 @@ async def save_recipe(
             status_code=status.HTTP_409_CONFLICT, detail="Recipe is already saved."
         )
 
-    # Exclude recipe_ingredients from the DB
     new_saved_recipe = RecipeModel(
-        **recipe_data.model_dump(exclude={"id", "recipe_ingredients"}),
+        **recipe_data.model_dump(),
         user_id=current_user.id,
     )
+
     db.add(new_saved_recipe)
     await db.commit()
     await db.refresh(new_saved_recipe)
 
-    # Return recipe with ingredients manually added
-    return {
-        "title": new_saved_recipe.title,
-        "description": new_saved_recipe.description,
-        "image_url": new_saved_recipe.image_url,
-        "source_url": new_saved_recipe.source_url,
-        "recipe_ingredients": recipe_data.recipe_ingredients,
-    }
+    return new_saved_recipe
+
+
+@router.get("/{saved_recipe_id}", response_model=RecipeResponse)
+async def get_saved_recipe(
+    current_user: CurrentUser,
+    saved_recipe_id: UUID,
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
+    saved_recipe = await db.get(RecipeModel, saved_recipe_id)
+    if not saved_recipe:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Saved recipe not found."
+        )
+    if saved_recipe.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="User not authorized."
+        )
+    return saved_recipe
 
 
 @router.get("", response_model=list[RecipeResponse])
@@ -95,18 +113,50 @@ async def get_saved_recipes(
     )
     saved_recipes = result.scalars().all()
 
-    # dictionary of recipes.
-    result = []
+    return saved_recipes
 
-    for recipe in saved_recipes:
-        result.append(
-            {
-                "title": recipe.title,
-                "description": recipe.description,
-                "image_url": recipe.image_url,
-                "source_url": recipe.source_url,
-                "recipe_ingredients": [],
-            }
+
+@router.patch("/{saved_recipe_id}", response_model=RecipeResponse)
+async def partial_update_saved_recipe(
+    current_user: CurrentUser,
+    saved_recipe_id: UUID,
+    saved_recipe_data: RecipeUpdate,
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
+    saved_recipe = await db.get(RecipeModel, saved_recipe_id)
+    if not saved_recipe:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Saved recipe not found."
+        )
+    if saved_recipe.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="User not authorized."
         )
 
-    return result
+    update_data = saved_recipe_data.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(saved_recipe, field, value)
+
+    await db.commit()
+    await db.refresh(saved_recipe)
+    return saved_recipe
+
+
+@router.delete("/{saved_recipe_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_saved_recipe(
+    current_user: CurrentUser,
+    saved_recipe_id: UUID,
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
+    saved_recipe = await db.get(RecipeModel, saved_recipe_id)
+    if not saved_recipe:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Saved recipe not found."
+        )
+    if saved_recipe.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="User not authorized."
+        )
+
+    await db.delete(saved_recipe)
+    await db.commit()
