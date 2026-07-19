@@ -1,9 +1,9 @@
 import { LogOut } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuthContext } from "@/hooks/useAuthContext";
 import { Button } from "@/components/ui/button";
 
 const Header = ({title}) => {
-    const { logout, user } = useAuth();
+    const { logout, user } = useAuthContext();
 
     return (
         <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 md:hidden">

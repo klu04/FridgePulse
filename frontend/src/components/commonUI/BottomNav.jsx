@@ -2,11 +2,11 @@ import { Link, useLocation } from "react-router-dom";
 import { Home, Refrigerator, ChefHat, BarChart3, Plus, Utensils, ScanLine, ScanBarcode } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { 
-  Drawer, 
-  DrawerTrigger, 
-  DrawerContent, 
-  DrawerClose 
+import {
+    Drawer,
+    DrawerTrigger,
+    DrawerContent,
+    DrawerClose
 } from "@/components/ui/drawer";
 
 const left_nav = [
@@ -20,7 +20,7 @@ const right_nav = [
 ];
 
 function NavLink({ to, label, Icon, end, pathname }) {
-    
+
     const isActive = end
         ? pathname === to
         : pathname === to || pathname.startsWith(`${to}/`);
@@ -93,9 +93,9 @@ const BottomNav = ({ className }) => {
 
                                 {/* Option 1: Add a food item */}
                                 <DrawerClose asChild>
-                                    <Button 
-                                        variant="ghost" 
-                                        className="w-full justify-start text-left h-12 px-4 font-normal active:bg-muted transition-colors" 
+                                    <Button
+                                        variant="ghost"
+                                        className="w-full justify-start text-left h-12 px-4 font-normal active:bg-muted transition-colors"
                                         asChild
                                     >
                                         <Link to="/add-item">
@@ -107,9 +107,9 @@ const BottomNav = ({ className }) => {
 
                                 {/* Option 2: Scan barcode */}
                                 <DrawerClose asChild>
-                                    <Button 
-                                        variant="ghost" 
-                                        className="w-full justify-start text-left h-12 px-4 font-normal active:bg-muted transition-colors" 
+                                    <Button
+                                        variant="ghost"
+                                        className="w-full justify-start text-left h-12 px-4 font-normal active:bg-muted transition-colors"
                                         asChild
                                     >
                                         <Link to="/scan-barcode">
@@ -121,9 +121,9 @@ const BottomNav = ({ className }) => {
 
                                 {/* Option 3: Scan product */}
                                 <DrawerClose asChild>
-                                    <Button 
-                                        variant="ghost" 
-                                        className="w-full justify-start text-left h-12 px-4 font-normal active:bg-muted transition-colors" 
+                                    <Button
+                                        variant="ghost"
+                                        className="w-full justify-start text-left h-12 px-4 font-normal active:bg-muted transition-colors"
                                         asChild
                                     >
                                         <Link to="/scan-object">
