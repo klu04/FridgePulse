@@ -1,139 +1,101 @@
-import { Outlet, useLocation, Link } from "react-router-dom";
-import {
-  SidebarProvider,
-  Sidebar,
-  SidebarContent,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-  SidebarHeader,
-  SidebarInset,
-  SidebarFooter,
-  SidebarTrigger
-} from "@/components/ui/sidebar";
-import { Button } from "@/components/ui/button";
-import { Home, Refrigerator, ChefHat, BarChart3, ScanLine, ScanBarcode, Utensils, LogOut } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
+import { Link, Outlet, useLocation } from "react-router-dom";
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
+import AppSidebar from "@/components/commonUI/AppSidebar";
 import BottomNav from "@/components/commonUI/BottomNav";
 import Header from "@/components/commonUI/Header";
+import { Plus, ScanBarcode, ScanEye } from "lucide-react";
+import { GuestBanner } from '@/components/auth/GuestBanner'
+import { Button } from "../ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+
+const allRoutes = [
+  { to: "/dashboard", label: "Home" },
+  { to: "/all-items", label: "Kitchen" },
+  { to: "/recipes", label: "Recipes" },
+  { to: "/reports", label: "Reports" },
+  { to: "/add-item", label: "Add Product" },
+  { to: "/scan-barcode", label: "Scan Barcode" },
+  { to: "/scan-object", label: "Scan Products" },
+];
 
 export default function AuthLayout() {
   const location = useLocation();
-  const { logout, user } = useAuth();
 
-  const isScanning = location.pathname.includes("scan-object") || location.pathname.includes("scan-barcode");
+  const isScanning = location.pathname.includes("scan-object") ||
+    location.pathname.includes("scan-barcode");
 
-  const menuItems = [
-    { to: "/dashboard", label: "Home", Icon: Home },
-    { to: "/all-items", label: "Kitchen", Icon: Refrigerator },
-    { to: "/recipes", label: "Recipes", Icon: ChefHat },
-    { to: "/reports", label: "Reports", Icon: BarChart3 },
-  ];
-
-  const actionItems = [
-    { to: "/add-item", label: "Add Product", Icon: Utensils },
-    { to: "/scan-barcode", label: "Scan Barcode", Icon: ScanBarcode },
-    { to: "/scan-object", label: "Scan Products", Icon: ScanLine },
-  ];
-
-  // Handle dynamic header name
-  const allRoutes = [...menuItems, ...actionItems];
-
-  const activeRoute = allRoutes.find(route =>
-    location.pathname === route.to || location.pathname.startsWith(`${route.to}/`)
+  const activeRoute = allRoutes.find(
+    (r) => location.pathname === r.to || location.pathname.startsWith(`${r.to}/`)
   );
+  const pageTitle = activeRoute?.label ?? "ShelfLife";
+  const fabRoutes = ["/dashboard", "/all-items", "recipes", "/reports"];
+  const showFab = fabRoutes.includes(activeRoute?.to);
 
-  const pageTitle = activeRoute?.label || (location.pathname === "/" ? "Home" :  "ShelfLife");
-
-  if (isScanning) {
-    return <Outlet />;
-  }
+  if (isScanning) return <Outlet />;
 
   return (
     <SidebarProvider>
-      {/* Sidebar */}
-      <Sidebar collapsible="icon" className="group hidden md:flex">
-        <SidebarHeader className="flex flex-row mb-2 h-16 items-center justify-between gap-2 border-b px-4 group-data-[collapsible=icon]:justify-center">
-          <h2 className="text-lg font-semibold group-data-[collapsible=icon]:hidden">
-            ShelfLife
-          </h2>
-          <SidebarTrigger className="-ml-1" />
-        </SidebarHeader>
+      <AppSidebar />
 
-        <SidebarContent>
-          <SidebarMenu>
-            {menuItems.map((item) => (
-              <SidebarMenuItem
-                key={item.to}
-                className="group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-end"
-              >
-                <SidebarMenuButton
-                  asChild
-                  isActive={location.pathname === item.to}
-                  tooltip={item.label}
-                  className="justify-start group-data-[collapsible=icon]:justify-end"
-                >
-                  <Link to={item.to}>
-                    <item.Icon />
-                    <span>{item.label}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-
-          <SidebarMenu>
-            <div className="px-3 py-2 text-xs font-semibold text-muted-foreground group-data-[collapsible=icon]:hidden">
-              Actions
-            </div>
-            {actionItems.map((item) => (
-              <SidebarMenuItem
-                key={item.to}
-                className="group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-end"
-              >
-                <SidebarMenuButton
-                  asChild
-                  isActive={location.pathname === item.to}
-                  tooltip={item.label}
-                  className="justify-start group-data-[collapsible=icon]:justify-end"
-                >
-                  <Link to={item.to}>
-                    <item.Icon />
-                    <span>{item.label}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-        </SidebarContent>
-
-        <SidebarFooter className="border-t p-2">
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <div className="flex items-center gap-2 p-2 group-data-[collapsible=icon]:justify-center">
-                {user?.email && (
-                  <span className="text-sm text-muted-foreground truncate group-data-[collapsible=icon]:hidden">
-                    {user.email}
-                  </span>
-                )}
-                <Button variant="ghost" size="icon" onClick={logout} aria-label="Log out" className="ml-auto group-data-[collapsible=icon]:ml-0">
-                  <LogOut className="h-5 w-5" />
-                </Button>
-              </div>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarFooter>
-      </Sidebar>
-
-      {/* Main Content */}
       <SidebarInset className="flex-1 flex flex-col min-w-0">
-        <Header title={pageTitle}/>
+        <Header title={pageTitle} />
         <main className="flex-1 overflow-x-hidden overflow-y-auto p-4 pb-16 md:pb-4 max-w-full">
+          <GuestBanner />
           <Outlet />
         </main>
       </SidebarInset>
 
-      {/* Mobile: Bottom Navigation */}
+      {showFab && (
+        <DropdownMenu>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  size="icon"
+                  className="hidden md:flex fixed bottom-20 right-4 md:bottom-6 md:right-6 z-50 h-14 w-14 rounded-full shadow-lg"
+                >
+                  <Plus className="h-6 w-6" />
+                </Button>
+              </DropdownMenuTrigger>
+            </TooltipTrigger>
+            <TooltipContent side="left">
+              <p>Create</p>
+            </TooltipContent>
+          </Tooltip>
+          <DropdownMenuContent side="top" align="end" className="mb-2 w-max">
+            <DropdownMenuItem asChild>
+              <Link to="/add-item">
+                <Plus className="mr-2 h-4 w-4 shrink-0" /> 
+                Add Product
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/scan-barcode">
+                <ScanBarcode className="mr-2 h-4 w-4 shrink-0" /> 
+                Scan Barcode
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/scan-object">
+                <ScanEye className="mr-2 h-4 w-4 shrink-0" /> 
+                Scan Products
+              </Link>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+      )}
+
       <div className="md:hidden">
         <BottomNav />
       </div>
