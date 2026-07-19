@@ -1,16 +1,13 @@
-// Name: Paula Tica
-// Date: 05/23/2026
-
-import { useAuth } from "@/lib/useAuth";
+import { useAuthContext } from "@/hooks/useAuthContext";
 import { useNavigate } from "react-router-dom";
 
 function LogoutButton() {
-  const { logout } = useAuth();
+  const { logout } = useAuthContext();
   const navigate = useNavigate();
 
-  function handleLogout() {
+  async function handleLogout() {
     if (window.confirm("Are you sure you want to log out?")) {
-      logout();
+      await logout();
       navigate("/login");
     }
   }

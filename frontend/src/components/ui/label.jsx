@@ -1,5 +1,3 @@
-// Auto-generated from shadcn
-
 import * as React from "react"
 import { Label as LabelPrimitive } from "radix-ui"
 
