@@ -10,9 +10,8 @@ import SignUp from './pages/Signup';
 import BarcodeScanner from './pages/BarcodeScanner';
 import ImageScanner from './pages/ImageClassification';
 import LandingPage from './pages/LandingPage';
-import AuthGate from './components/auth/AuthGate';
 import AuthLayout from './components/layouts/AuthLayout';
-import GuestGate from './components/auth/GuestGate';
+import { AppRoute, PublicRoute } from './components/auth/ProtectedRoute';
 import { TooltipProvider } from './components/ui/tooltip';
 
 
@@ -22,12 +21,12 @@ function App() {
       <BrowserRouter>
         <div className="flex flex-col min-h-screen w-full">
           <Routes>
-            <Route element={<GuestGate />}>
+            <Route element={<PublicRoute />}>
               <Route index element={<LandingPage />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<SignUp />} />
             </Route>
-            <Route element={<AuthGate />}>
+            <Route element={<AppRoute />}>
               <Route element={<AuthLayout />}>
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/add-item" element={<AddItem />} />
