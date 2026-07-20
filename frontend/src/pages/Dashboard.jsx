@@ -1,72 +1,46 @@
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
-import { Card, CardHeader, CardTitle } from "@/components/ui/card"
-import { daysUntilExpiry, ExpiryBadge, rowColor } from "@/lib/expiry";
-import { FOOD_ITEMS_URL, RECIPES_URL } from "@/lib/api";
-import { useAuth } from "@/hooks/useAuth";
-import { apiFetch } from "@/lib/api"
+import CardSection from "@/components/cards/CardSection";
+import ProductCard from "@/components/cards/ProductCard";
+import RecipeCard from "@/components/cards/RecipeCard";
+import { daysUntilExpiration } from "@/lib/expiry";
+import { FOOD_ITEMS_URL, SAVED_RECIPES_URL, apiFetch } from "@/lib/api";
+import { useAuthContext } from "@/hooks/useAuthContext";
+import { getGuestFoodItems, getGuestSavedRecipes, isGuestModeEnabled } from "@/lib/guestStore";
 
-const mockRecipes = [
-    { id: 1, title: "Salmon Alfredo", image: null, category: "Dinner" },
-    { id: 2, title: "Blueberry Waffles", image: null, category: "Breakfast" },
-    { id: 3, title: "Caesar Salad", image: null, category: "Lunch" },
-    { id: 4, title: "Cajun Chicken and Rice", image: null, category: "Dinner" },
-    { id: 5, title: "Veggie Scramble", image: null, category: "Breakfast" },
-    { id: 6, title: "Grilled Cheese Sandwich", image: null, category: "Lunch" },
-]
+function daysSinceCreated(dateStr) {
+    if (!dateStr) return null;
 
-function PantryTable({ items }) {
-    return (
-        <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-                <thead className="bg-gray-50 text-gray-600 uppercase text-xs">
-                    <tr>
-                        <th className="px-3 py-2 md:px-4 md:py-3 text-left">Name</th>
-                        <th className="px-3 py-2 md:px-4 md:py-3 text-left hidden md:table-cell">Brand</th>
-                        <th className="px-3 py-2 md:px-4 md:py-3 text-left hidden md:table-cell">Quantity</th>
-                        <th className="px-3 py-2 md:px-4 md:py-3 text-left">Category</th>
-                        <th className="px-3 py-2 md:px-4 md:py-3 text-left hidden md:table-cell">Barcode</th>
-                        <th className="px-3 py-2 md:px-4 md:py-3 text-left">Expiration</th>
-                    </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                    {items.length === 0 ? (
-                        <tr>
-                            <td colSpan={5} className="px-3 py-3 text-center text-gray-400">No items</td>
-                        </tr>
-                    ) : (
-                        items.map((item) => (
-                            <tr key={item.id} className={`hover:brightness-95 ${rowColor(item.expiration_date)}`}>
-                                <td className="px-3 py-2 md:px-4 md:py-3 font-medium">{item.name}</td>
-                                <td className="px-3 py-2 md:px-4 md:py-3 text-gray-500 hidden md:table-cell">{item.brand ?? "—"}</td>
-                                <td className="px-3 py-2 md:px-4 md:py-3 text-gray-500 hidden md:table-cell">{item.quantity ?? "—"}</td>
-                                <td className="px-3 py-2 md:px-4 md:py-3">{item.category ?? "—"}</td>
-                                <td className="px-3 py-2 md:px-4 md:py-3 hidden md:table-cell">{item.barcode ?? "—"}</td>
-                                <td className="px-3 py-2 md:px-4 md:py-3">
-                                    <ExpiryBadge dateStr={item.expiration_date} />
-                                </td>
-                            </tr>
-                        ))
-                    )}
-                </tbody>
-            </table>
-        </div>
-    );
+    const created = new Date(dateStr);
+    if (Number.isNaN(created.getTime())) return null;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    created.setHours(0, 0, 0, 0);
+
+    return Math.floor((today.getTime() - created.getTime()) / 86400000);
 }
+
 
 function Dashboard() {
     const [foodItems, setFoodItems] = useState([]);
     const [savedRecipes, setSavedRecipes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const { isGuest } = useAuthContext();
 
-    const { token } = useAuth();
 
     useEffect(() => {
         async function fetchFoodItems() {
             try {
-                const data = await apiFetch(FOOD_ITEMS_URL, token);
+                if (isGuest || isGuestModeEnabled()) {
+                    const items = await getGuestFoodItems();
+                    console.log('guest item shape:', items[0]);
+                    setFoodItems({ data: items });
+                    return;
+                }
+
+                const data = await apiFetch(FOOD_ITEMS_URL);
+                console.log('logged-in item shape:', data?.data?.[0] ?? data?.[0]);
                 setFoodItems(data);
             } catch (err) {
                 setError(err.message);
@@ -76,22 +50,24 @@ function Dashboard() {
         }
 
         fetchFoodItems();
-    }, [token]);
+    }, [isGuest]);
 
     useEffect(() => {
         async function fetchSavedRecipes() {
             try {
-                const SAVED_RECIPES_URL = RECIPES_URL.replace("/get-recipe-suggestions", "");
-                const data = await apiFetch(SAVED_RECIPES_URL, token);
+                if (isGuest || isGuestModeEnabled()) {
+                    setSavedRecipes(await getGuestSavedRecipes());
+                    return;
+                }
+
+                const data = await apiFetch(SAVED_RECIPES_URL);
                 setSavedRecipes(Array.isArray(data) ? data : data?.recipes || []);
             } catch (err) {
                 console.error("Failed to load saved recipes", err);
             }
         }
-        if (token) {
-            fetchSavedRecipes();
-        }
-    }, [token]);
+        fetchSavedRecipes();
+    }, [isGuest]);
 
     if (loading) {
         return (
@@ -109,76 +85,53 @@ function Dashboard() {
         );
     }
     const expiringSoon = foodItems['data'].filter(item => {
-        const days = daysUntilExpiry(item.expiration_date);
+        const days = daysUntilExpiration(item.expiration_date);
         return days !== null && days <= 3;
     });
 
-    const currentItems = foodItems['data'].filter(item => {
-        const days = daysUntilExpiry(item.expiration_date);
-        return days === null || days > 3;
+    // Show items that have been recently added based on item's created date.
+    const recentlyAddedItems = foodItems['data'].filter(item => {
+        const days = daysSinceCreated(item.created_at ?? item.updated_at);
+        return days !== null && days <= 3;
     });
-    
+
     // Display saved recipes if available, otherwise fall back to the mock array
-    const displayRecipes = savedRecipes.length > 0 ? savedRecipes : mockRecipes;
+    const displayRecipes = savedRecipes.length > 0 ? savedRecipes : [];
 
     return (
-        <div className="p-6 max-w-5xl mx-auto space-y-6">
-            <h1 className="text-center text-2xl md:text-4xl font-semibold text-gray-900 pl-8 md:pl-0">Smart Grocery Housekeeping</h1>
-
+        <div className="p-6 max-w-5xl md:max-w-4/5 mx-auto space-y-6">
             {/* Expiring Soon Table */}
-            <div className="rounded-lg border border-red-400 bg-white">
-                <div className="p-3 md:p-4 border-b border-red-400 bg-red-200 flex items-center justify-between gap-2">
-                    <div>
-                        <h2 className="text-lg md:text-2xl font-semibold text-gray-900">Expiring Soon</h2>
-                        <p className="text-xs md:text-sm text-red-500">Expiring within 3 days or already expired</p>
-                    </div>
-                    <Link to="/all-items">
-                        <Button variant="outline" size="sm">View All</Button>
-                    </Link>
-                </div>
-                <PantryTable items={expiringSoon} />
-            </div>
+            <CardSection
+                title="Expiring Soon"
+                to="/all-items"
+                isEmpty={expiringSoon.length === 0}
+                emptyText="Nothing expiring soon."    
+            >
+                {expiringSoon.map((item) => <ProductCard key={item.id} item={item} />)}
+            </CardSection>
 
-            {/* Current Items Table */}
-            <div className="rounded-lg border bg-white">
-                <div className="p-3 md:p-4 border-b bg-emerald-200 flex items-center justify-between gap-2">
-                    <h2 className="text-lg md:text-2xl font-semibold text-gray-900">Current Items</h2>
-                    <div className="flex gap-2 shrink-0">
-                        <Link to="/additem">
-                            <Button variant="outline" size="sm">Add Item</Button>
-                        </Link>
-                        <Link to="/all-items">
-                            <Button variant="outline" size="sm">View All</Button>
-                        </Link>
-                    </div>
-                </div>
-                <PantryTable items={currentItems} />
-            </div>
+            {/* Recently Added Groceries Table */}
+            <CardSection
+                title="Recently Added"
+                to="/all-items"
+                isEmpty={recentlyAddedItems.length === 0}
+                emptyText="Your fridge/pantry is empty."
+            >
+                {recentlyAddedItems.map((item) => <ProductCard key={item.id} item={item} badgeType="created" />)}
+
+            </CardSection>
 
             {/* Recipes Section */}
-            <div className="rounded-lg border bg-white">
-                <div className="p-3 md:p-4 border-b bg-olive-200 flex items-center justify-between gap-2">
-                    <h2 className="text-lg md:text-2xl font-semibold text-gray-900">Recipes</h2>
-                    <Link to="/recipes">
-                        <Button variant="outline" size="sm">View All</Button>
-                    </Link>
-                </div>
-                <div className="p-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    {displayRecipes.slice(0, 3).map((recipe, index) => (
-                        <Card key={recipe.title || recipe.id || index} className="relative mx-auto w-full pt-0">
-                            <div className="absolute inset-0 z-30 aspect-video bg-black/10" />
-                            <img
-                                src={recipe.image_url ?? recipe.image ?? "https://placehold.co/640x360"}
-                                alt={recipe.title}
-                                className="relative z-20 aspect-video w-full object-cover"
-                            />
-                            <CardHeader>
-                                <CardTitle className="text-sm">{recipe.title}</CardTitle>
-                            </CardHeader>
-                        </Card>
-                    ))}
-                </div>
-            </div>
+
+            <CardSection
+                title="Saved Recipes"
+                to="/saved-recipes"
+                isEmpty={displayRecipes.length === 0}
+                emptyText="No saved recipes."
+            >
+                {displayRecipes.map((recipe) => <RecipeCard key={recipe.id} recipe={recipe}/>)}
+            </CardSection>
+
         </div>
     );
 }

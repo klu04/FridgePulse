@@ -14,7 +14,7 @@ export function isGuestModeEnabled() {
 }
 
 export async function getGuestFoodItems() {
-    return db.food_items.orderBy('updatedAt').reverse().toArray()
+    return db.food_items.orderBy('updated_at').reverse().toArray()
 }
 
 export async function createGuestFoodItem(payload) {
@@ -22,8 +22,8 @@ export async function createGuestFoodItem(payload) {
         id: guestId(),
         ...payload,
         synced: 0,
-        createdAt: nowIso(),
-        updatedAt: nowIso(),
+        created_at: nowIso(),
+        updated_at: nowIso(),
     }
 
     await db.food_items.put(item)
@@ -37,7 +37,7 @@ export async function updateGuestFoodItem(id, payload) {
     const updated = {
         ...existing,
         ...payload,
-        updatedAt: nowIso(),
+        updated_at: nowIso(),
     }
 
     await db.food_items.put(updated)
@@ -56,14 +56,14 @@ export async function logGuestUsage(item, action) {
         action,
         logged_at: nowIso(),
         synced: 0,
-        updatedAt: nowIso(),
+        updated_at: nowIso(),
     }
     await db.usage_logs.put(entry)
     return entry
 }
 
 export async function getGuestSavedRecipes() {
-    return db.recipes.orderBy('updatedAt').reverse().toArray()
+    return db.recipes.orderBy('updated_at').reverse().toArray()
 }
 
 export async function deleteGuestSavedRecipes(id) {
@@ -80,7 +80,7 @@ export async function saveGuestRecipe(recipe) {
         id: recipe.localId ?? guestId(),
         recipe_id: externalId,   // external Spoonacular ID
         synced: existing ? recipe.synced ?? 0 : 0,
-        updatedAt: nowIso(),
+        updated_at: nowIso(),
     }
     await db.recipes.put(stored)
     return stored
