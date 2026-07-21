@@ -1,26 +1,42 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { BrowserMultiFormatReader } from "@zxing/browser";
 import { Button } from "@/components/ui/button";
 
-const OFF_API = "https://world.openfoodfacts.org/api/v0/product";
+const OFF_API = "https://world.openfoodfacts.org/api/v3.6/product";
+
+function stopScannerControls(controls) {
+  if (!controls) return;
+
+  Promise.resolve(controls.stop()).catch((stopError) => {
+    console.debug("Failed to stop scanner controls:", stopError);
+  });
+}
 
 async function lookupBarcode(barcode) {
+  // Look up barcode via open food facts api
   const response = await fetch(`${OFF_API}/${barcode}.json`);
+
   if (!response.ok) throw new Error("Lookup failed");
   const data = await response.json();
-  if (data.status !== 1) return null; // product not found
+
+  const status = data.status;
+  if (status !== "success" && status !== "success_with_warnings") return null;
 
   const p = data.product;
+
+
   return {
     name: p.product_name || p.product_name_en || "",
     brand: p.brands?.split(",")[0].trim() || "",
     category: p.categories?.split(",")[0].trim() || "",
+    image_url: p.image_front_small_url || p.image_front_thumb_url || p.image_front_url,
     barcode,
   };
 }
 
 function ManualInput({ onSubmit, loading }) {
+  // Manually input barcode of grocery item
   const [value, setValue] = useState("");
   const [validationError, setValidationError] = useState(null);
 
@@ -46,6 +62,7 @@ function ManualInput({ onSubmit, loading }) {
   }
 
   function handleKey(e) {
+    // Detect "enter" from keyboard
     if (e.key === "Enter") handleSubmit();
   }
 
@@ -83,7 +100,8 @@ function ManualInput({ onSubmit, loading }) {
 function BarcodeScanner() {
   const navigate = useNavigate();
   const videoRef = useRef(null);
-  const readerRef = useRef(null);
+  const streamRef = useRef(null);
+  const controlsRef = useRef(null);
   const processingRef = useRef(false);
   const lastBarcodeRef = useRef(null);
   const scanSessionRef = useRef(0);
@@ -94,39 +112,119 @@ function BarcodeScanner() {
   const [lookingUp, setLookingUp] = useState(false);
   const [cameraError, setCameraError] = useState(null);
   const [lookupError, setLookupError] = useState(null);
-  const [result, setResult] = useState(null); // found product
+  const [result, setResult] = useState(null);
+
+  // Helper to navigate with both state and query params for maximum compatibility
+  const goToAddItem = useCallback((data) => {
+    const params = new URLSearchParams();
+    if (data.barcode) params.set("barcode", data.barcode);
+    if (data.name) params.set("name", data.name);
+    if (data.brand) params.set("brand", data.brand);
+    if (data.category) params.set("category", data.category);
+    if (data.image_url) params.set("image_url", data.image_url)
+
+    navigate(`/add-item?${params.toString()}`, { state: data });
+  }, [navigate]);
+
+  const handleBarcode = useCallback(async (barcode) => {
+    setLookupError(null);
+    setLookingUp(true);
+    try {
+      const product = await lookupBarcode(barcode);
+      if (product) {
+        setResult(product);
+      } else {
+        // Not in Open Food Facts — go to AddItem pre-filled
+        goToAddItem({ barcode });
+      }
+    } catch {
+      setLookupError(
+        "Could not reach Open Food Facts. You can still add the item manually."
+      );
+      setResult(null);
+    } finally {
+      setLookingUp(false);
+    }
+  }, [goToAddItem]);
 
   useEffect(() => {
     if (mode !== "camera") return;
 
     const sessionId = ++scanSessionRef.current;
     const reader = new BrowserMultiFormatReader();
-    readerRef.current = reader;
-    setScanning(true);
+    let disposed = false;
+    const videoNode = videoRef.current;
+    let localStream = null;
 
-    reader
-      .decodeFromVideoDevice(undefined, videoRef.current, (res) => {
-        if (sessionId !== scanSessionRef.current) return;
-        if (res && !processingRef.current) {
-          const code = res.getText();
-          if (code === lastBarcodeRef.current) return;
-          processingRef.current = true;
-          lastBarcodeRef.current = code;
-          stopCamera();
-          handleBarcode(code);
+    setScanning(true);
+    setCameraError(null);
+
+    async function startCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: "environment" } },
+          audio: false,
+        });
+
+        if (disposed || sessionId !== scanSessionRef.current) {
+          stream.getTracks().forEach((track) => track.stop());
+          return;
         }
-      })
-      .catch((err) => {
+
+        localStream = stream;
+        streamRef.current = stream;
+
+        if (videoNode) {
+          videoNode.srcObject = stream;
+        }
+
+        const controls = await reader.decodeFromStream(stream, videoNode, (res) => {
+          if (sessionId !== scanSessionRef.current || disposed) return;
+          if (res && !processingRef.current) {
+            const code = res.getText();
+            if (code === lastBarcodeRef.current) return;
+            processingRef.current = true;
+            lastBarcodeRef.current = code;
+            setTimeout(() => stopCamera(), 0);
+            handleBarcode(code);
+          }
+        });
+
+        if (disposed || sessionId !== scanSessionRef.current) {
+          stopScannerControls(controls);
+          return;
+        }
+
+        controlsRef.current = controls;
+      } catch (err) {
+        if (disposed || sessionId !== scanSessionRef.current) return;
+        console.error("Camera start failed:", err);
         setCameraError(
           err?.message?.includes("Permission")
             ? "Camera permission denied. Please allow camera access or use manual mode."
-            : "Could not start camera. Try manual mode.",
+            : "Could not start camera. Try manual mode."
         );
         setScanning(false);
         setMode("manual");
-      });
-    return () => stopCamera();
-  }, [mode, scanAttempt]);
+      }
+    }
+
+    startCamera();
+
+    return () => {
+      disposed = true;
+      stopScannerControls(controlsRef.current);
+      controlsRef.current = null;
+      if (localStream) {
+        localStream.getTracks().forEach((track) => track.stop());
+        localStream = null;
+      }
+      if (videoNode) {
+        videoNode.srcObject = null;
+      }
+      setScanning(false);
+    };
+  }, [handleBarcode, mode, scanAttempt]);
 
   function handleRescan() {
     processingRef.current = false;
@@ -138,41 +236,20 @@ function BarcodeScanner() {
   }
 
   function stopCamera() {
-    if (videoRef.current?.srcObject) {
-      videoRef.current.srcObject.getTracks().forEach((track) => track.stop());
-      videoRef.current.srcObject = null;
+    stopScannerControls(controlsRef.current);
+    controlsRef.current = null;
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
     }
-    if (readerRef.current) {
-      try {
-        readerRef.current.reset();
-      } catch (_) {}
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
     }
     setScanning(false);
   }
 
-  async function handleBarcode(barcode) {
-    setLookupError(null);
-    setLookingUp(true);
-    try {
-      const product = await lookupBarcode(barcode);
-      if (product) {
-        setResult(product);
-      } else {
-        // Not in Open Food Facts — go to AddItem pre-filled with just the barcode
-        navigate("/additem", { state: { barcode } });
-      }
-    } catch {
-      setLookupError(
-        "Could not reach Open Food Facts. You can still add the item manually.",
-      );
-      setResult(null);
-    } finally {
-      setLookingUp(false);
-    }
-  }
-
   function handleUseResult() {
-    navigate("/additem", { state: result });
+    goToAddItem(result);
   }
 
   return (
@@ -195,11 +272,10 @@ function BarcodeScanner() {
             setLookupError(null);
             setMode("camera");
           }}
-          className={`px-4 py-2 rounded-md text-sm font-medium border transition-colors ${
-            mode === "camera"
+          className={`px-4 py-2 rounded-md text-sm font-medium border transition-colors ${mode === "camera"
               ? "bg-emerald-500 text-white border-emerald-500"
               : "bg-white text-gray-600 border-gray-300 hover:bg-gray-50"
-          }`}
+            }`}
         >
           📷 Camera
         </button>
@@ -210,11 +286,10 @@ function BarcodeScanner() {
             setLookupError(null);
             setMode("manual");
           }}
-          className={`px-4 py-2 rounded-md text-sm font-medium border transition-colors ${
-            mode === "manual"
+          className={`px-4 py-2 rounded-md text-sm font-medium border transition-colors ${mode === "manual"
               ? "bg-emerald-500 text-white border-emerald-500"
               : "bg-white text-gray-600 border-gray-300 hover:bg-gray-50"
-          }`}
+            }`}
         >
           ⌨️ Manual
         </button>
@@ -224,11 +299,18 @@ function BarcodeScanner() {
       {mode === "camera" && !result && (
         <div className="space-y-3">
           <div className="relative rounded-lg overflow-hidden border border-gray-300 bg-black aspect-video">
-            <video ref={videoRef} className="w-full h-full object-cover" />
+            {/* autoPlay, muted, and playsInline are REQUIRED for camera streams to start */}
+            <video
+              ref={videoRef}
+              className="w-full h-full object-cover"
+              autoPlay
+              muted
+              playsInline
+            />
             {scanning && (
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 {/* Scanning reticle */}
-                <div className="w-56 h-36 border-2 border-emerald-400 rounded-md opacity-80">
+                <div className="relative w-56 h-36 border-2 border-emerald-400 rounded-md opacity-80">
                   <div className="absolute top-0 left-0 w-5 h-5 border-t-4 border-l-4 border-emerald-400 rounded-tl" />
                   <div className="absolute top-0 right-0 w-5 h-5 border-t-4 border-r-4 border-emerald-400 rounded-tr" />
                   <div className="absolute bottom-0 left-0 w-5 h-5 border-b-4 border-l-4 border-emerald-400 rounded-bl" />
@@ -288,6 +370,10 @@ function BarcodeScanner() {
             <div className="flex gap-2">
               <dt className="font-medium text-gray-600 w-24">Barcode</dt>
               <dd className="text-gray-900 font-mono">{result.barcode}</dd>
+            </div>
+            <div className="flex gap-2">
+              <dt className="font-medium text-gray-600 w-24">Image URL</dt>
+              <dd className="text-gray-900 font-mono truncate min-w-0 flex-1">{result.image_url}</dd>
             </div>
           </dl>
           <div className="flex gap-3">
