@@ -6,6 +6,8 @@ from pydantic import BaseModel, ConfigDict, EmailStr, Field
 class UserBase(BaseModel):
     name: str | None = Field(default=None, min_length=2, max_length=30)
     email: EmailStr = Field(max_length=255)
+    is_active: bool = True
+    is_superuser: bool = False
 
 
 class UserCreate(UserBase):

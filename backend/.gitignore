@@ -12,11 +12,9 @@ __pycache__/
 .venv/
 env/
 venv/
-<<<<<<< HEAD
-=======
-Dockerfile
+
+# nginx
 nginx.conf
-C:\Users\dimit\OneDrive\Documents\School\OSU-Post-Bacc\Spring-2026\CS467\Smart-Grocery-Housekeeping\backend\Dockerfile
->>>>>>> 4e2d4062768d2b817d05cf5ea0497c091c96004e
+
 # ruff
 .ruff_cache/

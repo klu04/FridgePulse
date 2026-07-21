@@ -4,7 +4,8 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth.services import CurrentUser
+from app.auth.utils import CurrentUser
+from app.config import settings
 from app.database.db import get_db
 from app.users.exceptions import EmailAlreadyExistsError, UserNotFoundError
 from app.users.schema import UserCreate, UserPrivate, UserUpdate
@@ -30,6 +31,11 @@ async def register_user(
     - **HTTPException**: Raises 409 on duplicate email.
     """
 
+    if not settings.USERS_OPEN_REGISTRATION:
+        raise HTTPException(
+            status_code=403,
+            detail="User registrations are currently closed. Try again at another time.",
+        )
     try:
         user = await services.register_user(user_create=user_register, session=db)
     except EmailAlreadyExistsError as e:

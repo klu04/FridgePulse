@@ -1,3 +1,4 @@
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -8,13 +9,17 @@ from app.config import settings
 from app.database.db import engine
 from app.routers import api_router
 
+# Configure logging BEFORE anything else
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Handles startup and shutdown of resources at app startup and shutdown."""
-
     yield
-    # Shutdown database engine
     await engine.dispose()
 
 
@@ -26,6 +31,13 @@ origins = [
     "http://localhost:5173",
     "https://localhost",
     "https://localhost:5173",
+    "http://0.0.0.0:5173",
+    "https://0.0.0.0:5173",
+    "http://192.168.50.85:5173",
+    "https://192.168.50.85:5173",
+    "http://192.168.50.98:5173",
+    "http://192.168.50.98:5173",
+    "https://dosage-matchless-suspend.ngrok-free.dev",
 ]
 
 app.add_middleware(

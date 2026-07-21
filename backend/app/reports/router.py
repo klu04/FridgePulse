@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth.services import CurrentUser
+from app.auth.utils import CurrentUser
 from app.database.db import get_db
 from app.database.models import FoodItem as FoodItemModel
 from app.database.models import UsageLog

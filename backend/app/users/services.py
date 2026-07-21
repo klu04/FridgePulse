@@ -3,7 +3,7 @@ from uuid import UUID
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth.services import get_password_hash
+from app.auth.utils import get_password_hash
 from app.database.models import User as UserModel
 from app.users.exceptions import EmailAlreadyExistsError, UserNotFoundError
 from app.users.schema import UserCreate, UserUpdate
@@ -17,6 +17,7 @@ async def register_user(*, user_create: UserCreate, session: AsyncSession) -> Us
     new_user = UserModel(
         name=user_create.name,
         email=user_create.email,
+        is_superuser=user_create.is_superuser,
         password_hash=get_password_hash(user_create.password),
     )
 

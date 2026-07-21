@@ -46,6 +46,7 @@ class FoodItemResponse(FoodItemBase):
 
     id: UUID
     user_id: UUID
+    created_at: datetime.datetime
 
 
 class FoodItemsPublic(BaseModel):
