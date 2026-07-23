@@ -1,14 +1,10 @@
-// AddItem.jsx — connects to POST /v1/food-items
-// Name: Zilin Xu
-// Date: 4/22/2026
-// Last updated: 5/6/2026
-
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { FOOD_ITEMS_URL } from "@/lib/api";
-import { useAuth } from "@/hooks/useAuth";
 import { apiFetch } from "@/lib/api"
+import { useAuthContext } from "@/hooks/useAuthContext";
+import { createGuestFoodItem, isGuestModeEnabled } from "@/lib/guestStore";
 
 const CATEGORIES = [
   "Dairy", "Bakery", "Produce", "Seafood", "Meat",
@@ -18,11 +14,20 @@ const CATEGORIES = [
 function AddItem() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { isGuest } = useAuthContext();
 
-  const { token } = useAuth();
-
-  // Pre-fill from barcode scanner if available
-  const prefill = location.state ?? {};
+  const prefill = useMemo(() => {
+    const queryParams = new URLSearchParams(location.search);
+    return {
+      ...(location.state ?? {}),
+      barcode: location.state?.barcode ?? queryParams.get("barcode") ?? "",
+      name: location.state?.name ?? queryParams.get("name") ?? "",
+      brand: location.state?.brand ?? queryParams.get("brand") ?? "",
+      quantity: location.state?.quantity ?? queryParams.get("quantity") ?? "1",
+      category: location.state?.category ?? queryParams.get("category") ?? "",
+      image_url: location.state?.image_url ?? queryParams.get("image_url") ?? "",
+    };
+  }, [location.search, location.state]);
 
   const [form, setForm] = useState({
     name: prefill.name ?? "",
@@ -30,10 +35,27 @@ function AddItem() {
     quantity: prefill.quantity ?? "1",
     barcode: prefill.barcode ?? "",
     category: prefill.category ?? "",
+    image_url: prefill.image_url ?? "",
     expiration_date: "",
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (!prefill.barcode && !prefill.name && !prefill.brand && !prefill.category && !prefill.image_url) {
+      return;
+    }
+
+    setForm((current) => ({
+      ...current,
+      name: prefill.name || current.name,
+      brand: prefill.brand || current.brand,
+      quantity: prefill.quantity || current.quantity,
+      barcode: prefill.barcode || current.barcode,
+      category: prefill.category || current.category,
+      image_url: prefill.image_url || current.image_url,
+    }));
+  }, [prefill]);
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -51,16 +73,21 @@ function AddItem() {
       quantity: form.quantity || null,
       barcode: form.barcode || null,
       category: form.category || null,
+      image_url: form.image_url || null,
       expiration_date: form.expiration_date || null,
     };
 
     try {
-      const response = await apiFetch(FOOD_ITEMS_URL, token, {
-        method: "POST",
-        body: JSON.stringify(payload),
-      });
+      if (isGuest || isGuestModeEnabled()) {
+        await createGuestFoodItem(payload);
+      } else {
+        await apiFetch(FOOD_ITEMS_URL, {
+          method: "POST",
+          body: JSON.stringify(payload),
+        });
+      }
 
-      navigate("/");
+      navigate("/dashboard");
     } catch (err) {
       setError(err.message);
     } finally {
@@ -98,7 +125,7 @@ function AddItem() {
             Name <span className="text-red-500">*</span>
           </label>
           <input
-            id="name" name="name" type="text" required minLength={4} maxLength={50}
+            id="name" name="name" type="text" required minLength={3} maxLength={255}
             value={form.name} onChange={handleChange} placeholder="e.g. Whole Milk"
             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
           />
@@ -118,7 +145,7 @@ function AddItem() {
             Quantity <span className="text-red-500">*</span>
           </label>
           <input
-            id="quantity" name="quantity" type="text" required maxLength={30}
+            id="quantity" name="quantity" type="text" required maxLength={6}
             value={form.quantity} onChange={handleChange} placeholder="1.00"
             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
           />
@@ -146,6 +173,15 @@ function AddItem() {
             <option value="">— Select a category —</option>
             {CATEGORIES.map((cat) => <option key={cat} value={cat}>{cat}</option>)}
           </select>
+        </div>
+
+        <div className="space-y-1">
+          <label className="text-sm font-medium text-gray-700" htmlFor="image_url">Image URL</label>
+          <input
+            id="image_url" name="image_url" type="text" maxLength={30}
+            value={form.image_url} onChange={handleChange} placeholder="http://food-image.com"
+            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
+          />
         </div>
 
         <div className="space-y-1">
