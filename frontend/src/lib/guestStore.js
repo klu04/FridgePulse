@@ -18,6 +18,13 @@ export async function getGuestFoodItems() {
 }
 
 export async function createGuestFoodItem(payload) {
+    if (payload.barcode) {
+        const existing_barcode = await db.food_items.where('barcode').equals(payload.barcode).first();
+        if (existing_barcode) {
+            throw new Error('An item with this barcode already exists.')
+        }
+    }
+
     const item = {
         id: guestId(),
         ...payload,
