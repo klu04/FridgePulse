@@ -50,8 +50,7 @@ export default defineConfig({
         ],
       },
       workbox: {
-
-        maximumFileSizeToCacheInBytes: 100 * 1024 * 1024, 
+        globIgnores: ['**/*.wasm', '**/classifier.worker-*.js'],
         runtimeCaching: [
           {
             urlPattern: ({ url }) => url.hostname.includes('huggingface.co'),
@@ -61,6 +60,19 @@ export default defineConfig({
               expiration: {
                 maxEntries: 10,
                 maxAgeSeconds: 60 * 60 * 24 * 365
+              }
+            }
+          },
+          {
+            // local ONNX runtime wasm + worker - caches on first use
+            urlPattern: ({ url }) =>
+              url.pathname.endsWith('.wasm') || /classifier\.worker.*\.js$/.test(url.pathname),
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'onnx-runtime-local',
+              expiration: {
+                maxEntries: 5,
+                maxAgeSeconds: 60 * 60 * 24 * 30
               }
             }
           }
