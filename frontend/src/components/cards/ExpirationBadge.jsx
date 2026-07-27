@@ -1,25 +1,29 @@
 import { Clock } from "lucide-react";
+import { daysUntilExpiration } from "@/lib/expiry";
 
 function DaysBadge({ date, mode = "expiring" }) {
     if (!date) return null;
-
-    const target = new Date(date);
-    if (Number.isNaN(target.getTime())) return null;
-
-    const now = new Date();
-    const diffMs = mode === "expiring" ? target - now : now - target; // converts to milliseconds when subtracting dates
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-    const diffDays = Math.floor(diffHours / 24);
 
     let label;
     let isUrgent;
 
     if (mode === "expiring") {
-        isUrgent = diffHours <= 72; // Items expiring in 3 days
-        label = diffHours <= 0 ? "Exp" : diffHours < 24 ? `${diffHours}h` : `${diffDays}d`;
-    // "created" mode: elapsed time since the item was added
-    } else { 
-        isUrgent = diffHours < 24; // Items that were within 24 hours
+        const days = daysUntilExpiration(date);
+        if (days === null) return null;
+
+        isUrgent = days <= 3;
+        label = days < 0 ? "Exp" : days === 0 ? "Today" : `${days}d`;
+    } else {
+        // "created" mode
+        const target = new Date(date);
+        if (Number.isNaN(target.getTime())) return null;
+
+        const now = new Date();
+        const diffMs = now - target;
+        const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+        const diffDays = Math.floor(diffHours / 24);
+
+        isUrgent = diffHours < 24;
         label = diffHours < 1 ? "New" : diffHours < 24 ? `${diffHours}h` : `${diffDays}d`;
     }
 
