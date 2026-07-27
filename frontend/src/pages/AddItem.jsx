@@ -20,10 +20,10 @@ function AddItem() {
     const queryParams = new URLSearchParams(location.search);
     return {
       ...(location.state ?? {}),
-      barcode: location.state?.barcode ?? queryParams.get("barcode") ?? "",
       name: location.state?.name ?? queryParams.get("name") ?? "",
       brand: location.state?.brand ?? queryParams.get("brand") ?? "",
       quantity: location.state?.quantity ?? queryParams.get("quantity") ?? "1",
+      barcode: location.state?.barcode ?? queryParams.get("barcode") ?? "",
       category: location.state?.category ?? queryParams.get("category") ?? "",
       image_url: location.state?.image_url ?? queryParams.get("image_url") ?? "",
     };

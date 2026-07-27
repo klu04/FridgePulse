@@ -2,20 +2,19 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { useAuth } from "@/hooks/useAuth"
+import { useAuthContext } from "@/hooks/useAuthContext"
 import { Link } from "react-router-dom"
 import { Refrigerator } from "lucide-react";
 import { useNavigate } from "react-router-dom"
 
 function SignUp() {
     // Track input of each password field
-
     const [name, setName] = useState("")
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [confirmPassword, setConfirmPassword] = useState("")
 
-    const { register, login } = useAuth();
+    const { register, login } = useAuthContext();
     const navigate = useNavigate();
 
     // Check if both password fields have been entered and don't match
@@ -31,7 +30,6 @@ function SignUp() {
             return
         }
         try {
-            console
             await register({ name: name || null, email, password });
             await login({ email, password });
             navigate("/dashboard");

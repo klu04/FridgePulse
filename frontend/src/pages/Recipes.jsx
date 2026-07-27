@@ -1,39 +1,29 @@
-// Name: Paula Tica
-// Date: 4/29/2026, updated 5/21/2026
-// Citation:
-// Adapted code from shadcn
-// Adapted code from tailwindcss
-// URL: https://ui.shadcn.com/docs/components/radix/card 
-// URL: https://ui.shadcn.com/colors
-// URL: https://tailwindcss.com/docs/grid-template-columns 
-
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChevronRight } from 'lucide-react';
+import { SAVED_RECIPES_URL, RECIPES_URL, apiFetch } from "@/lib/api";
 import { useState } from "react";
-import { Button } from "@/components/ui/button"
-import { Card, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { RECIPES_URL, apiFetch } from "@/lib/api";
-import { useAuth } from "@/hooks/useAuth"
-
-const mockRecipes = [
-    {id: 1, title: "Salmon Alfredo", image: null},
-    {id: 2, title: "Blueberry Waffles", image: null},
-    {id: 3, title: "Caesar Salad", image: null},
-    {id: 4, title: "Cajun Chicken and Rice", image: null},
-    {id: 5, title: "Veggie Scramble", image: null},
-    {id: 6, title: "Grilled Cheese Sandwich", image: null},
-]
+import SavedRecipes from "./SavedRecipes";
+import { useAuthContext } from "@/hooks/useAuthContext";
+import { isGuestModeEnabled, saveGuestRecipe } from "@/lib/guestStore";
 
 function Recipes() {
     const [recipes, setRecipes] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-
-    const { token } = useAuth();
+    const [savedRecipesKey, setSavedRecipesKey] = useState(0);
+    const { isGuest } = useAuthContext();
 
     async function fetchRecipes() {
         setLoading(true);
         setError(null);
         try {
-            const data = await apiFetch(RECIPES_URL, token);
+            if (isGuest || isGuestModeEnabled()) {
+                setRecipes(recipes);
+                return;
+            }
+
+            const data = await apiFetch(RECIPES_URL);
             setRecipes(data.recipes || []);
         } catch (err) {
             setError(err.message);
@@ -44,24 +34,35 @@ function Recipes() {
 
     async function handleSaveRecipe(recipe) {
         try {
-            // RECIPES_URL points to /get-recipe-suggestions. We remove it to target the POST endpoint.
-            const SAVE_RECIPE_URL = RECIPES_URL.replace("/get-recipe-suggestions", "");
-            await apiFetch(SAVE_RECIPE_URL, token, {
-                method: "POST",
-                body: JSON.stringify(recipe),
-            });
+            if (isGuest || isGuestModeEnabled()) {
+                await saveGuestRecipe(recipe);
+            } else {
+                await apiFetch(SAVED_RECIPES_URL, {
+                    method: "POST",
+                    body: JSON.stringify(recipe),
+                });
+            }
             alert("Recipe saved successfully!");
+            setSavedRecipesKey(prev => prev + 1);
         } catch (err) {
             alert(`Failed to save recipe: ${err.message}`);
         }
     }
 
     return (
-        <div className="p-6 max-w-5xl mx-auto space-y-6">
-            <h1 className="text-center text-4xl font-semibold text-gray-900">Recipes</h1>
-            
+        <div className="max-w-5xl mx-auto space-y-6">
+            <h1 className="text-left text-sm font-semibold text-gray-900">Suggested Recipes</h1>
+
+            {error && (
+                <div className="text-center text-red-500">Failed to load recipes: {error}</div>
+            )}
+
+            {!loading && !error && recipes.length === 0 && (
+                <p className="text-center text-sm text-gray-500 mt-8">Click the button to generate recipes based on your expiring items. A maximum of 6 recipes will be generated per day.</p>
+            )}
+
             <div className="flex justify-center">
-                <Button 
+                <Button
                     onClick={fetchRecipes}
                     disabled={loading}
                     className="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-2"
@@ -70,51 +71,42 @@ function Recipes() {
                 </Button>
             </div>
 
-            {error && (
-                <div className="text-center text-red-500">Failed to load recipes: {error}</div>
-            )}
-            
-            {!loading && !error && recipes.length === 0 && (
-                <p className="text-center text-gray-500 mt-8">Click the button above to generate recipes based on your expiring items. A maximum of 6 recipes will be generated per day.</p>
-            )}
-
             {/* Responsive grid layout */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {recipes.map((recipe, index) => (
-                    // Display a card for each recipe
-                    // Each card includes an image, header, title, and footer
-                    <Card key={recipe.title || index} className="relative mx-auto w-full pt-0">
-                        <div className="absolute inset-0 z-30 aspect-video bg-black/10" />
+                    <Card key={recipe.name || index} className="relative mx-auto w-full max-w-sm pt-0">
                         <img
                             src={recipe.image_url ?? "https://placehold.co/640x360"}
-                            alt={recipe.title}
-                            className="relative z-20 aspect-video w-full object-cover"
+                            alt={recipe.name}
+                            className="relative aspect-square w-full object-cover"
                         />
-                        <CardHeader>
-                            <CardTitle>{recipe.title}</CardTitle>
-                        </CardHeader>
-                        <CardFooter className="flex justify-between bg-neutral-200">
-                            <Button 
-                                type="button" 
-                                variant="outline" 
-                                className="bg-white 
-                                text-base md:text-sm"
+                        <CardHeader className="flex flex-row items-center justify-between pr-2 md:pr-0">
+                            <CardTitle className="text-xs md:text-lg truncate">
+                                {recipe.name}
+                            </CardTitle>
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                className="shrink-0"
                                 onClick={() => window.open(recipe.source_url, "_blank")}
-                                >View Recipe</Button>
-                            <Button 
-                                type="button" 
+                            ><ChevronRight className="size-5 md:size-6" /></Button>
+                        </CardHeader>
+                        <CardContent className="flex justify-center">
+                            <Button
+                                type="button"
+                                size="sm"
+                                className="w-24 bg-emerald-500 hover:bg-emerald-600 text-white text-xs "
                                 onClick={() => handleSaveRecipe(recipe)}
-                                className="bg-emerald-500 hover:bg-emerald-600 text-white text-base md:text-sm"
-                            >
-                                Save
-                            </Button>
-                        </CardFooter>
+                            >Save</Button>
+                        </CardContent>
                     </Card>
                 ))}
             </div>
-
+            <SavedRecipes refresh={savedRecipesKey}/>
         </div>
     )
 }
+
 
 export default Recipes

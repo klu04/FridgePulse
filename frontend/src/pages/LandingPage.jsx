@@ -1,7 +1,7 @@
+import { useAuthContext } from "@/hooks/useAuthContext";
 import { Refrigerator } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import Header from "@/components/commonUI/Header";
 import {
     Item,
     ItemContent,
@@ -45,6 +45,14 @@ const features = [
 ]
 
 function LandingPage() {
+
+    const { setGuestMode } = useAuthContext()
+    const navigate = useNavigate()
+
+    const handleTryOffline = () => {
+        setGuestMode(true)
+        navigate('/dashboard')
+    }
     return (
         <div className="flex flex-col justify-center mx-auto w-full max-w-4xl px-6 py-20 lg:min-h-dvh">
             {/* Hero */}
@@ -65,11 +73,11 @@ function LandingPage() {
                         <Link to="/signup">
                             <Button variant="outline" size="lg">Sign Up</Button>
                         </Link>
+                        <Button onClick={handleTryOffline}>Try Offline</Button>
                     </div>
                 </div>
 
                 <div className="flex flex-col">
-                    <Header title="Features" />
                     <ItemGroup className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {features.map((feature) => (
                             <Item key={feature.name} variant="muted" className="p-6 items-start content-start">

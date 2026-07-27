@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Refrigerator } from "lucide-react";
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { useAuth } from "@/hooks/useAuth"
+import { useAuthContext } from "@/hooks/useAuthContext"
 import { useNavigate } from "react-router-dom"
 import { Link } from "react-router-dom"
 
@@ -12,7 +12,7 @@ function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
-    const { login } = useAuth()
+    const { login } = useAuthContext()
     const navigate = useNavigate();
 
 

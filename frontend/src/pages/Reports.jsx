@@ -1,14 +1,4 @@
-// Name: Paula Tica
-// Date: 05/08/2026
-// This page provides data on the following:
-// items frequently used
-// items frequently left unused
-// items frequently spoiled
-// Citation:
-// URL: https://lucide.dev/icons/categories
-
 import { useEffect, useState } from "react"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Utensils, ClockAlert, Trash2 } from "lucide-react"
 import {
@@ -16,22 +6,23 @@ import {
     REPORTS_FREQUENTLY_WASTED_URL,
     REPORTS_UNUSED_URL,
 } from "@/lib/api"
-import { useAuth } from "@/hooks/useAuth"
 import { apiFetch } from "@/lib/api"
+import { useAuthContext } from "@/hooks/useAuthContext"
+import { getGuestReports, isGuestModeEnabled } from "@/lib/guestStore"
 
 // Displays a list of the items within each report
-function ItemList({items}) {
+function ItemList({ items }) {
     return (
-    <div className="flex flex-col gap-2">
-        {items.map((item) => (
-            <div key={item.name} className="flex justify-between items-center">
-                <span className="text-sm text-foreground">{item.name}</span>
-                <span className="text-xs text-muted-foreground whitespace-nowrap">
-                    {item.count} {item.unit}
-                </span>
-            </div>
-        ))}
-    </div>
+        <div className="flex flex-col gap-2">
+            {items.map((item) => (
+                <div key={item.name} className="flex justify-between items-center">
+                    <span className="text-sm text-foreground">{item.name}</span>
+                    <span className="text-xs text-muted-foreground whitespace-nowrap">
+                        {item.count} {item.unit}
+                    </span>
+                </div>
+            ))}
+        </div>
     )
 }
 
@@ -41,17 +32,25 @@ function Reports() {
     const [spoiledItems, setSpoiledItems] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
-    const { token } = useAuth();
+    const { isGuest } = useAuthContext()
 
     useEffect(() => {
         async function fetchReports() {
             setLoading(true)
             setError(null)
             try {
+                if (isGuest || isGuestModeEnabled()) {
+                    const guestReports = await getGuestReports()
+                    setUsedItems(guestReports.usedItems)
+                    setUnusedItems(guestReports.unusedItems)
+                    setSpoiledItems(guestReports.spoiledItems)
+                    return
+                }
+
                 const [usedRes, unusedRes, wastedRes] = await Promise.all([
-                    apiFetch(REPORTS_FREQUENTLY_USED_URL, token),
-                    apiFetch(REPORTS_UNUSED_URL, token),
-                    apiFetch(REPORTS_FREQUENTLY_WASTED_URL, token),
+                    apiFetch(REPORTS_FREQUENTLY_USED_URL),
+                    apiFetch(REPORTS_UNUSED_URL),
+                    apiFetch(REPORTS_FREQUENTLY_WASTED_URL),
                 ])
 
                 setUsedItems(usedRes)
@@ -65,7 +64,7 @@ function Reports() {
         }
 
         fetchReports()
-    }, [])
+    }, [isGuest])
 
     // The three report cards
     const reports = [
@@ -124,20 +123,20 @@ function Reports() {
                 {reports.map((report) => (
                     <Card key={report.title} className="mx-auto w-full">
                         <CardHeader>
-                        <div className="flex items-center justify-between">
-                            <div
-                                className="w-8 h-8 rounded-md flex items-center justify-center"
-                                style={{ backgroundColor: report.iconBg }}
-                            >
-                                {report.icon}
+                            <div className="flex items-center justify-between">
+                                <div
+                                    className="w-8 h-8 rounded-md flex items-center justify-center"
+                                    style={{ backgroundColor: report.iconBg }}
+                                >
+                                    {report.icon}
+                                </div>
                             </div>
-                        </div>
-                        <CardTitle>{report.title}</CardTitle>
-                        <p className={`text-s ${report.descriptionColor}`}>{report.description}</p>
+                            <CardTitle>{report.title}</CardTitle>
+                            <p className={`text-s ${report.descriptionColor}`}>{report.description}</p>
                         </CardHeader>
                         <CardContent>
                             {report.items.length > 0 ? (
-                                <ItemList items={report.items}/>
+                                <ItemList items={report.items} />
                             ) : (
                                 <p className="text-sm text-muted-foreground">No data yet</p>
                             )}
