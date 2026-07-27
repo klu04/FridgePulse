@@ -90,7 +90,7 @@ function SavedRecipes({ refresh }) {
                             />
                             <CardHeader className="min-w-0 p-2">
                                 <CardAction>
-                                    <Badge variant="secondary" className="text-[10px]">Featured</Badge>
+                                    <Badge variant="secondary" className="text-[10px]">{recipe.category}</Badge>
                                 </CardAction>
                                 <CardTitle className="truncate block w-full text-xs">{recipe.name}</CardTitle>
                             </CardHeader>
