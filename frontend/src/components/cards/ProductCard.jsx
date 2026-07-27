@@ -4,7 +4,7 @@ import { ItemTitle } from "@/components/ui/item";
 
 function ProductCard({ item, badgeType = "expiring" }) {
     const date = badgeType === "created"
-        ? (item.createdAt ?? item.updatedAt)
+        ? (item.created_at ?? item.updated_at)
         : item.expiration_date;
 
     return (
