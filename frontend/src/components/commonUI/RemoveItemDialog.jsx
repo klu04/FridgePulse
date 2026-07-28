@@ -54,7 +54,7 @@ export function RemoveItemDialog({
                 </div>
                 <DialogFooter>
                     <DialogClose asChild>
-                        <Button variant="outline" disabled={!!removing} className="w-full">
+                        <Button variant="outline" disabled={!!removing}>
                             Cancel
                         </Button>
                     </DialogClose>

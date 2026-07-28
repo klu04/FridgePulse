@@ -95,9 +95,9 @@ export function EditDialog({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogTrigger asChild>{trigger}</DialogTrigger>
-            <DialogContent className="max-w-sm">
-                <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} className="contents">
+                <DialogTrigger asChild>{trigger}</DialogTrigger>
+                <DialogContent className="max-w-sm">
                     <DialogHeader>
                         <DialogTitle>{title}</DialogTitle>
                         {description && <DialogDescription>{description}</DialogDescription>}
@@ -206,8 +206,8 @@ export function EditDialog({
                             {isLoading ? "Updating..." : "Save changes"}
                         </Button>
                     </DialogFooter>
-                </form>
-            </DialogContent>
+                </DialogContent>
+            </form>
         </Dialog>
     )
 }
