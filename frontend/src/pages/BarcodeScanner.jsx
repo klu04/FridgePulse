@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { ScanBarcode, Type} from "lucide-react"
 import { useNavigate } from "react-router-dom";
 import { BrowserMultiFormatReader } from "@zxing/browser";
 import { Button } from "@/components/ui/button";
@@ -277,7 +278,7 @@ function BarcodeScanner() {
               : "bg-white text-gray-600 border-gray-300 hover:bg-gray-50"
             }`}
         >
-          📷 Camera
+          <span className="flex items-center gap-2"><ScanBarcode size={16}/> Scan </span> 
         </button>
         <button
           onClick={() => {
@@ -291,7 +292,7 @@ function BarcodeScanner() {
               : "bg-white text-gray-600 border-gray-300 hover:bg-gray-50"
             }`}
         >
-          ⌨️ Manual
+          <span className="flex items-center gap-2"><Type size={16}/> Manual </span> 
         </button>
       </div>
 
