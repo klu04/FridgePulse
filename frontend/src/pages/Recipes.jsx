@@ -51,7 +51,7 @@ function Recipes() {
 
     return (
         <div className="max-w-5xl mx-auto space-y-6">
-            <h1 className="text-left text-sm font-semibold text-gray-900">Suggested Recipes</h1>
+            <h1 className="text-left text-sm font-semibold text-gray-900 mt-2">Suggested Recipes</h1>
 
             {error && (
                 <div className="text-center text-red-500">Failed to load recipes: {error}</div>
