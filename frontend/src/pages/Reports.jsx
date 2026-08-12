@@ -116,8 +116,6 @@ function Reports() {
 
     return (
         <div className="p-6 max-w-5xl mx-auto space-y-6">
-            <h1 className="text-center text-4xl font-semibold text-gray-900">Reports</h1>
-
             {/* Responsive grid: 1 column on mobile, 2 on tablet, 3 on desktop */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {reports.map((report) => (
