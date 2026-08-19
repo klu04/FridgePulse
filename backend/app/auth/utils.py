@@ -1,9 +1,3 @@
-# Name: Krystal Lu (klu04)
-# Citation for auth.py
-# Date: 05/14/2026
-# Code Adapted from "FastAPI Docs - OAuth2 with Password (and hashing), Bearer with JWT tokens"
-# Source URL: https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/
-
 from datetime import datetime, timedelta, timezone
 from typing import Annotated
 

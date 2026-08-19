@@ -1,9 +1,3 @@
-# Name: Krystal Lu (klu04)
-# Citation for Async Testing setup
-# Date: 04/30/2025
-# Adapted from "Testing the API - Pytest, Fixtures, and Mocking External Services"
-# Source URL: https://www.youtube.com/watch?v=SO7m7nod0ts
-
 from collections.abc import AsyncGenerator
 
 import pytest
