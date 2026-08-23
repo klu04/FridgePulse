@@ -7,8 +7,8 @@ function CardSection({ title, to, isEmpty, emptyText, children }) {
         <div className="mb-6">
             <div className="flex items-center justify-between px-4 mb-2">
                 <h2 className="text-sm font-semibold text-gray-900">{title}</h2>
-                <Link to={to}>
-                    <ChevronRight size={20} className="text-gray-400" />
+                <Link to={to} aria-label={`View all ${title}`}>
+                    <ChevronRight size={20} className="text-gray-500" />
                 </Link>
             </div>
             {isEmpty ? (

@@ -11,36 +11,43 @@ import {
     ItemTitle,
 } from "@/components/ui/item"
 
+import pantryIcon from '../assets/icons/icons8-pantry-100.png';
+import barcodeIcon from '../assets/icons/icons8-barcode-100.png';
+import recognitionIcon from '../assets/icons/icons8-grocery-100.png';
+import recipeIcon from '../assets/icons/icons8-recipe-100.png';
+import mobileIcon from '../assets/icons/icons8-mobile-100.png';
+import reportIcon from '../assets/icons/icons8-report-100.png';
+
 const features = [
     {
         name: "Pantry Management",
         description: "Add, update, and delete pantry items with details like brand, category, quantity, and expiration date",
-        image: "https://img.icons8.com/?size=100&id=qK8WL0EIVmrw&format=png&color=000000"
+        image: pantryIcon
     },
     {
         name: "Barcode Scanning",
         description: "Scan product barcodes with your camera to auto-populate item details via the Open Food Facts API",
-        image: "https://img.icons8.com/?size=100&id=9hZVoio3Prjv&format=png&color=000000"
+        image: barcodeIcon
     },
     {
         name: "Food Recognition",
         description: "Identify fruits and vegetables using a ML model through your device camera",
-        image: "https://img.icons8.com/?size=100&id=feS2IHYk2ga4&format=png&color=000000"
+        image: recognitionIcon
     },
     {
         name: "Recipe Suggestions",
         description: "Get recipe ideas based on items expiring within 3 days (powered by Spoonacular API)",
-        image: "https://img.icons8.com/?size=100&id=AXKi0XGZeq0Z&format=png&color=000000"
+        image: recipeIcon
     },
     {
         name: "Usage Reports",
         description: "Track consumption patterns and food waste analytics",
-        image: "https://img.icons8.com/?size=100&id=EUisNPir8iLD&format=png&color=000000"
+        image: reportIcon
     },
     {
         name: "PWA Support",
         description: " Installable as a progressive web app to use as a native mobile app",
-        image: "https://img.icons8.com/?size=100&id=FRuHh0dWfr9w&format=png&color=000000"
+        image: mobileIcon
     }
 ]
 

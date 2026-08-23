@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import { Button } from "@/components/ui/button"
 import {
     Dialog,
@@ -73,6 +73,7 @@ export function EditDialog({
     isLoading = false,
 }) {
     const [form, setForm] = useState(() => buildFormFromItem(item));
+    const formId = useId();
 
     function handleChange(e) {
         const { name, value } = e.target;
@@ -95,7 +96,7 @@ export function EditDialog({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <form onSubmit={handleSubmit} className="contents">
+            <form id={formId} onSubmit={handleSubmit} className="contents">
                 <DialogTrigger asChild>{trigger}</DialogTrigger>
                 <DialogContent className="max-w-sm">
                     <DialogHeader>
@@ -202,7 +203,7 @@ export function EditDialog({
                         <DialogClose asChild>
                             <Button type="button" variant="outline">Cancel</Button>
                         </DialogClose>
-                        <Button type="submit" variant={variant} disabled={isLoading}>
+                        <Button type="submit" form={formId} variant={variant} disabled={isLoading}>
                             {isLoading ? "Updating..." : "Save changes"}
                         </Button>
                     </DialogFooter>
