@@ -1,0 +1,39 @@
+import { createBrowserRouter } from "react-router-dom";
+import { AppRoute, PublicRoute } from "@/components/auth/ProtectedRoute";
+import AuthLayout from "@/components/layouts/AuthLayout";
+import RootLayout from "@/components/layouts/RootLayout";
+import LandingPage from "@/pages/LandingPage";
+
+export const router = createBrowserRouter([
+    {
+        Component: RootLayout,
+        children: [
+            {
+                Component: PublicRoute,
+                children: [
+                    { index: true, Component: LandingPage },
+                    { path: "login", lazy: () => import("@/pages/Login") },
+                    { path: "signup", lazy: () => import("@/pages/Signup") },
+                ],
+            },
+            {
+                Component: AppRoute,
+                children: [
+                    {
+                        Component: AuthLayout,
+                        children: [
+                            { path: "dashboard", lazy: () => import("@/pages/Dashboard") },
+                            { path: "add-item", lazy: () => import("@/pages/AddItem") },
+                            { path: "scan-barcode", lazy: () => import("@/pages/BarcodeScanner") },
+                            { path: "scan-object", lazy: () => import("@/pages/ImageClassification") },
+                            { path: "all-items", lazy: () => import("@/pages/AllItems") },
+                            { path: "recipes", lazy: () => import("@/pages/Recipes") },
+                            { path: "saved-recipes", lazy: () => import("@/pages/SavedRecipes") },
+                            { path: "reports", lazy: () => import("@/pages/Reports") },
+                        ],
+                    },
+                ],
+            },
+        ],
+    },
+]);

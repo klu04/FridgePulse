@@ -147,3 +147,4 @@ function Reports() {
 }
 
 export default Reports
+export const Component = Reports;

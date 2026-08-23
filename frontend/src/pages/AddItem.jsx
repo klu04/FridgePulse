@@ -212,3 +212,4 @@ function AddItem() {
 }
 
 export default AddItem;
+export const Component = AddItem;

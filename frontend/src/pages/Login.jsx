@@ -81,3 +81,4 @@ function Login() {
 }
 
 export default Login
+export const Component = Login;

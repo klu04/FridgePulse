@@ -285,3 +285,4 @@ function ImageScanner() {
 }
 
 export default ImageScanner;
+export const Component = ImageScanner;

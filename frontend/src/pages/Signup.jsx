@@ -120,3 +120,4 @@ function SignUp() {
 }
 
 export default SignUp
+export const Component = SignUp;

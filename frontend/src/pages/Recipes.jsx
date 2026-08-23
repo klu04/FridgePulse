@@ -110,3 +110,4 @@ function Recipes() {
 
 
 export default Recipes
+export const Component = Recipes;

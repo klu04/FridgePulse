@@ -148,3 +148,4 @@ function AllItems() {
 
 }
 export default AllItems;
+export const Component = AllItems;

@@ -395,3 +395,4 @@ function BarcodeScanner() {
 }
 
 export default BarcodeScanner;
+export const Component = BarcodeScanner;

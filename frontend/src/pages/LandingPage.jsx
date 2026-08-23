@@ -61,7 +61,7 @@ function LandingPage() {
         navigate('/dashboard')
     }
     return (
-        <div className="flex flex-col justify-center mx-auto w-full max-w-4xl px-6 py-20 lg:min-h-dvh">
+        <main className="flex flex-col justify-center mx-auto w-full max-w-4xl px-6 py-20 lg:min-h-dvh">
             {/* Hero */}
             <div className="flex flex-col gap-5 items-center flex-center justify-center">
 
@@ -87,7 +87,7 @@ function LandingPage() {
                 <div className="flex flex-col">
                     <ItemGroup className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {features.map((feature) => (
-                            <Item key={feature.name} variant="muted" className="p-6 items-start content-start">
+                            <Item key={feature.name} role="listitem" variant="muted" className="p-6 items-start content-start">
                                 <ItemHeader className="mb-2">
                                     <img
                                         src={feature.image}
@@ -97,14 +97,14 @@ function LandingPage() {
                                 </ItemHeader>
                                 <ItemContent>
                                     <ItemTitle>{feature.name}</ItemTitle>
-                                    <ItemDescription className="line-clamp-none">{feature.description}</ItemDescription>
+                                    <ItemDescription className="line-clamp-none text-gray-600">{feature.description}</ItemDescription>
                                 </ItemContent>
                             </Item>
                         ))}
                     </ItemGroup>
                 </div>
             </div>
-        </div>
+        </main>
     );
 }
 

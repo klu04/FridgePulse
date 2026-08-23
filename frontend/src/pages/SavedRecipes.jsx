@@ -129,3 +129,4 @@ function SavedRecipes({ refresh }) {
 }
 
 export default SavedRecipes;
+export const Component = SavedRecipes;
