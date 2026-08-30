@@ -1,11 +1,13 @@
-#! /usr/bin/env bash
+#!/bin/sh
 
-export PYTHONPATH=$(pwd)
+set -e
+
+export PYTHONPATH="$(pwd)"
 
 python app/backend_pre_start.py
 
 # Run migrations
 alembic upgrade head
 
-# # Create initial data in DB
+# Create initial data in DB
 python app/initial_data.py
