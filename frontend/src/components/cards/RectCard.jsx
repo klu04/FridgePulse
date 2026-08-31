@@ -1,10 +1,13 @@
 import { Item, ItemContent, ItemHeader } from "@/components/ui/item";
 
-function RectCard({ imageUrl, alt, badge, children }) {
+function RectCard({ imageUrl, alt, badge, children, onClick }) {
     return (
         <Item
             variant="outline"
             className="w-23 sm:w-26 md:w-45 flex-none min-w-0 rounded-lg overflow-hidden p-0"
+            onClick={onClick}
+            role={onClick ? "button" : undefined}
+            tabIndex={onClick ? 0 : undefined}
         >
             <ItemHeader className="relative m-0">
                 {badge}

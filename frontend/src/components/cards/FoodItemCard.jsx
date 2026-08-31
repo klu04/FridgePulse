@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -7,6 +8,7 @@ import {
     CardAction,
     CardFooter,
 } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { EditDialog } from "@/components/commonUI/EditDialog";
 import { RemoveItemDialog } from "@/components/commonUI/RemoveItemDialog";
 
@@ -23,14 +25,22 @@ function FoodItemCard({
     onRemove,
     removing,
 }) {
+    const [isInfoOpen, setInfoOpen] = useState(false);
+
     return (
         <Card className="relative w-full min-w-0 pt-0 overflow-hidden gap-0">
-            <div className="absolute inset-0 z-30 aspect-video bg-black/10" />
-            <img
-                src={item.image_url ?? "https://placehold.co/640x360"}
-                alt={item.name}
-                className="relative z-20 aspect-video w-full object-cover"
-            />
+            <div className="absolute inset-0 z-30 aspect-video bg-black/10 pointer-events-none" />
+            <button
+                type="button"
+                className="block w-full"
+                onClick={() => setInfoOpen(true)}
+            >
+                <img
+                    src={item.image_url ?? "https://placehold.co/640x360"}
+                    alt={item.name}
+                    className="relative z-20 aspect-video w-full object-cover"
+                />
+            </button>
             <CardHeader className="min-w-0 p-2">
                 <CardAction>
                     <Badge variant="secondary" className="text-[10px]">{item.category}</Badge>
@@ -69,6 +79,22 @@ function FoodItemCard({
                     removing={removing}
                 />
             </CardFooter>
+
+            <Dialog open={isInfoOpen} onOpenChange={setInfoOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>{item.name}</DialogTitle>
+                    </DialogHeader>
+                    <img
+                        src={item.image_url ?? "https://placehold.co/640x360"}
+                        alt={item.name}
+                        className="w-full rounded-md object-cover aspect-video"
+                    />
+                    <p>Category: {item.category}</p>
+                    <p>Quantity: {item.quantity ?? 1}</p>
+                    {item.expiration_date && <p>Expiration: {item.expiration_date}</p>}
+                </DialogContent>
+            </Dialog>
         </Card>
     );
 }
