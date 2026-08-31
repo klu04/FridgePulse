@@ -95,9 +95,6 @@ function SavedRecipes({ refresh }) {
                                 <CardTitle className="truncate block w-full text-xs">{recipe.name}</CardTitle>
                             </CardHeader>
                             <CardFooter className="p-4 pt-0 pb-3 gap-2 border-t-0">
-                                <Button variant="outline" className="flex-1">
-                                    Edit
-                                </Button>
                                 <ConfirmationDialog
                                     open={recipeToDelete?.id === recipe.id}
                                     onOpenChange={(isOpen) => {
@@ -106,7 +103,7 @@ function SavedRecipes({ refresh }) {
                                     trigger={
                                         <Button
                                             variant="outline"
-                                            className="flex-1 text-red-600 hover:text-red-600"
+                                            className="w-full text-red-600 hover:text-red-600"
                                             onClick={() => setRecipeToDelete(recipe)}
                                         >
                                             Delete

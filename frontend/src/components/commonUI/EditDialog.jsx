@@ -25,16 +25,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 const categories = [
-    { label: "Dairy", value: "dairy" },
-    { label: "Bakery", value: "bakery" },
-    { label: "Produce", value: "produce" },
-    { label: "Seafood", value: "seafood" },
-    { label: "Meat", value: "meat" },
-    { label: "Oils & Condiments", value: "oils & condiments" },
-    { label: "Beverages", value: "beverages" },
-    { label: "Snacks", value: "snacks" },
-    { label: "Frozen", value: "frozen" },
-    { label: "Other", value: "other" },
+    { label: "Dairy", value: "Dairy" },
+    { label: "Bakery", value: "Bakery" },
+    { label: "Produce", value: "Produce" },
+    { label: "Seafood", value: "Seafood" },
+    { label: "Meat", value: "Meat" },
+    { label: "Oils & Condiments", value: "Oils & Condiments" },
+    { label: "Beverages", value: "Beverages" },
+    { label: "Snacks", value: "Snacks" },
+    { label: "Frozen", value: "Frozen" },
+    { label: "Other", value: "Other" },
 ];
 
 const EMPTY_FORM = {
@@ -159,7 +159,7 @@ export function EditDialog({
                                     setForm((prev) => ({ ...prev, category: value }))
                                 }
                             >
-                                <SelectTrigger id="edit-category" className="w-full max-w-48">
+                                <SelectTrigger id="edit-category" className="w-full">
                                     <SelectValue placeholder="Select a category" />
                                 </SelectTrigger>
                                 <SelectContent>

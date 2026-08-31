@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import CardSection from "@/components/cards/CardSection";
-import ProductCard from "@/components/cards/ProductCard";
+import RecentlyAddedCard from "@/components/cards/RecentlyAddedCard";
 import RecipeCard from "@/components/cards/RecipeCard";
 import { daysUntilExpiration, daysSinceCreated } from "@/lib/expiry";
 import { FOOD_ITEMS_URL, SAVED_RECIPES_URL, apiFetch } from "@/lib/api";
@@ -88,21 +88,21 @@ function Dashboard() {
             {/* Expiring Soon Table */}
             <CardSection
                 title="Expiring Soon"
-                to="/all-items"
+                to="/kitchen"
                 isEmpty={expiringSoon.length === 0}
                 emptyText="Nothing expiring soon."    
             >
-                {expiringSoon.map((item) => <ProductCard key={item.id} item={item} />)}
+                {expiringSoon.map((item) => <RecentlyAddedCard key={item.id} item={item} />)}
             </CardSection>
 
             {/* Recently Added Groceries Table */}
             <CardSection
                 title="Recently Added"
-                to="/all-items"
+                to="/kitchen"
                 isEmpty={recentlyAddedItems.length === 0}
                 emptyText="Your fridge/pantry is empty."
             >
-                {recentlyAddedItems.map((item) => <ProductCard key={item.id} item={item} badgeType="created" />)}
+                {recentlyAddedItems.map((item) => <RecentlyAddedCard key={item.id} item={item} badgeType="created" />)}
 
             </CardSection>
 

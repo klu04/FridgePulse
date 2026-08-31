@@ -10,7 +10,7 @@ import {
 } from "@/lib/guestStore";
 import FoodItemCard from "@/components/cards/FoodItemCard";
 
-function AllItems() {
+function Kitchen() {
   const [items, setItems] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -147,5 +147,5 @@ function AllItems() {
   );
 
 }
-export default AllItems;
-export const Component = AllItems;
+export default Kitchen;
+export const Component = Kitchen;

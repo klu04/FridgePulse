@@ -20,7 +20,7 @@ import {
 
 const allRoutes = [
   { to: "/dashboard", label: "Home" },
-  { to: "/all-items", label: "Kitchen" },
+  { to: "/kitchen", label: "Kitchen" },
   { to: "/recipes", label: "Recipes" },
   { to: "/reports", label: "Reports" },
   { to: "/add-item", label: "Add Product" },
@@ -38,7 +38,7 @@ export default function AuthLayout() {
     (r) => location.pathname === r.to || location.pathname.startsWith(`${r.to}/`)
   );
   const pageTitle = activeRoute?.label ?? "ShelfLife";
-  const fabRoutes = ["/dashboard", "/all-items", "recipes", "/reports"];
+  const fabRoutes = ["/dashboard", "/kitchen", "recipes", "/reports"];
   const showFab = fabRoutes.includes(activeRoute?.to);
 
   if (isScanning) return <Outlet />;

@@ -11,7 +11,7 @@ import {
 
 const left_nav = [
     { to: "/dashboard", label: "Home", Icon: Home, end: true },
-    { to: "/all-items", label: "Kitchen", Icon: Refrigerator },
+    { to: "/kitchen", label: "Kitchen", Icon: Refrigerator },
 ];
 
 const right_nav = [

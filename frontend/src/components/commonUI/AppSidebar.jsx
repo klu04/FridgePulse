@@ -15,7 +15,7 @@ import { useAuthContext } from "@/hooks/useAuthContext";
 
 const menuItems = [
     { to: "/dashboard", label: "Home", Icon: Home },
-    { to: "/all-items", label: "Kitchen", Icon: Refrigerator },
+    { to: "/kitchen", label: "Kitchen", Icon: Refrigerator },
     { to: "/recipes", label: "Recipes", Icon: ChefHat },
     { to: "/reports", label: "Reports", Icon: BarChart3 },
 ];
