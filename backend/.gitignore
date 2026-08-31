@@ -6,15 +6,10 @@ __pycache__/
 .cache
 
 # Environments
-.env
 *.env
-.venv
 .venv/
 env/
 venv/
-
-# nginx
-nginx.conf
 
 # ruff
 .ruff_cache/

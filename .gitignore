@@ -6,15 +6,10 @@ __pycache__/
 .cache
 
 # Environments
-.env
-.env.copy
 *.env
-.venv
 .venv/
 env/
 venv/
-Dockerfile
-nginx.conf
 
 # ruff
 .ruff_cache/
