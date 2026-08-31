@@ -1,4 +1,5 @@
-import path from "path";
+import { fileURLToPath, URL } from "node:url";
+import process from "node:process";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
@@ -82,7 +83,7 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      "@": fileURLToPath(new URL("./src", import.meta.url)),
     },
   },
   optimizeDeps: { exclude: ['@huggingface/transformers'] },
@@ -90,7 +91,7 @@ export default defineConfig({
     allowedHosts: ['dosage-matchless-suspend.ngrok-free.dev'],
     proxy: {
       '/api': {
-        target: 'http://localhost:8000',
+        target: process.env.VITE_BACKEND_URL || 'http://backend:8000',
         changeOrigin: true,
       },
     },

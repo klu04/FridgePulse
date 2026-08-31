@@ -1,5 +1,5 @@
 import { clearAuth } from '@/lib/auth'
-export const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000"
+export const API_BASE = import.meta.env.VITE_API_BASE_URL ?? ""
 export const USER_INFO_URL = `${API_BASE}/api/v1/users/me`
 export const FOOD_ITEMS_URL = `${API_BASE}/api/v1/food-items`
 export const VISION_DETECT_URL = `${API_BASE}/api/v1/vision/detect-items`

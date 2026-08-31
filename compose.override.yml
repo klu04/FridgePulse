@@ -9,9 +9,10 @@ services:
     volumes:
       - ./backend:/app/backend
     entrypoint: ["sh", "-c"]
-    command: >
-      uv run ./prestart.sh &&
-      exec uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+    command:
+      - >
+        uv run ./prestart.sh &&
+        exec uv run uvicorn app.main:app --reload --reload-dir app --host 0.0.0.0 --port 8000
 
   frontend:
     build:
