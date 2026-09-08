@@ -1,9 +1,6 @@
-FROM node:24-alpine AS build
+FROM ghcr.io/pnpm/pnpm:11.25.0 AS build
 
 WORKDIR /app
-
-# Use Corepack-managed pnpm version from the lockfile metadata.
-RUN corepack enable
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile
@@ -11,7 +8,6 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 
 # Optionally set this at build time:
-# docker build --build-arg VITE_API_BASE_URL=https://api.example.com .
 ARG VITE_API_BASE_URL=
 ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
 
