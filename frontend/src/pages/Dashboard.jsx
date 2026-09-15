@@ -5,7 +5,14 @@ import RecipeCard from "@/components/cards/RecipeCard";
 import { daysUntilExpiration, daysSinceCreated } from "@/lib/expiry";
 import { FOOD_ITEMS_URL, SAVED_RECIPES_URL, apiFetch } from "@/lib/api";
 import { useAuthContext } from "@/hooks/useAuthContext";
-import { getGuestFoodItems, getGuestSavedRecipes, isGuestModeEnabled } from "@/lib/guestStore";
+import {
+    deleteGuestFoodItem,
+    getGuestFoodItems,
+    getGuestSavedRecipes,
+    isGuestModeEnabled,
+    logGuestUsage,
+    updateGuestFoodItem,
+} from "@/lib/guestStore";
 
 
 function Dashboard() {
@@ -13,6 +20,10 @@ function Dashboard() {
     const [savedRecipes, setSavedRecipes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [isSaving, setSaving] = useState(false);
+    const [removing, setRemoving] = useState(false);
+    const [itemToDelete, setItemToDelete] = useState(null);
+    const [itemToEdit, setItemToEdit] = useState(null);
     const { isGuest } = useAuthContext();
 
 
@@ -36,6 +47,89 @@ function Dashboard() {
 
         fetchFoodItems();
     }, [isGuest]);
+
+    async function handleEdit(updated) {
+        setSaving(true);
+        try {
+            const payload = {
+                name: updated.name || undefined,
+                brand: updated.brand,
+                quantity: updated.quantity,
+                barcode: updated.barcode,
+                category: updated.category,
+                image_url: updated.image_url,
+                expiration_date: updated.expiration_date,
+            };
+
+            const saved =
+                isGuest || isGuestModeEnabled()
+                    ? await updateGuestFoodItem(itemToEdit.id, payload)
+                    : await apiFetch(`${FOOD_ITEMS_URL}/${itemToEdit.id}`, {
+                        method: "PATCH",
+                        body: JSON.stringify(payload),
+                    });
+
+            setFoodItems((prev) => ({
+                ...prev,
+                data: prev.data.map((item) => (
+                    item.id === itemToEdit.id ? { ...item, ...saved } : item
+                )),
+            }));
+            setItemToEdit(null);
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setSaving(false);
+        }
+    }
+
+    async function handleRemove(action) {
+        setRemoving(action);
+        try {
+            if (action === "delete") {
+                if (isGuest || isGuestModeEnabled()) {
+                    await deleteGuestFoodItem(itemToDelete.id);
+                } else {
+                    await apiFetch(`${FOOD_ITEMS_URL}/${itemToDelete.id}`, { method: "DELETE" });
+                }
+            } else if (isGuest || isGuestModeEnabled()) {
+                await logGuestUsage(itemToDelete, action);
+            } else {
+                await apiFetch(`${FOOD_ITEMS_URL}/${itemToDelete.id}/log-usage`, {
+                    method: "POST",
+                    body: JSON.stringify({ action }),
+                });
+            }
+            setFoodItems((prev) => ({
+                ...prev,
+                data: prev.data.filter((item) => item.id !== itemToDelete.id),
+            }));
+            setItemToDelete(null);
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setRemoving(false);
+        }
+    }
+
+    function getItemDialogProps(item) {
+        return {
+            isEditOpen: itemToEdit?.id === item.id,
+            onEditOpenChange: (isOpen) => {
+                if (!isOpen) setItemToEdit(null);
+            },
+            onEditStart: () => setItemToEdit(item),
+            onEdit: handleEdit,
+            isSaving: isSaving && itemToEdit?.id === item.id,
+            isDeleteOpen: itemToDelete?.id === item.id,
+            onDeleteOpenChange: (isOpen) => {
+                if (!isOpen) setItemToDelete(null);
+            },
+            onDeleteStart: () => setItemToDelete(item),
+            onRemove: handleRemove,
+            removing: itemToDelete?.id === item.id ? removing : false,
+        };
+    }
 
     useEffect(() => {
         async function fetchSavedRecipes() {
@@ -92,7 +186,9 @@ function Dashboard() {
                 isEmpty={expiringSoon.length === 0}
                 emptyText="Nothing expiring soon."    
             >
-                {expiringSoon.map((item) => <RecentlyAddedCard key={item.id} item={item} />)}
+                {expiringSoon.map((item) => (
+                    <RecentlyAddedCard key={item.id} item={item} {...getItemDialogProps(item)} />
+                ))}
             </CardSection>
 
             {/* Recently Added Groceries Table */}
@@ -102,7 +198,14 @@ function Dashboard() {
                 isEmpty={recentlyAddedItems.length === 0}
                 emptyText="Your fridge/pantry is empty."
             >
-                {recentlyAddedItems.map((item) => <RecentlyAddedCard key={item.id} item={item} badgeType="created" />)}
+                {recentlyAddedItems.map((item) => (
+                    <RecentlyAddedCard
+                        key={item.id}
+                        item={item}
+                        badgeType="created"
+                        {...getItemDialogProps(item)}
+                    />
+                ))}
 
             </CardSection>
 

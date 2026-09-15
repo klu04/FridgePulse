@@ -8,8 +8,8 @@ import {
     CardAction,
     CardFooter,
 } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { EditDialog } from "@/components/commonUI/EditDialog";
+import { ItemDetailsDialog } from "@/components/commonUI/ItemDetailsDialog";
 import { RemoveItemDialog } from "@/components/commonUI/RemoveItemDialog";
 
 function FoodItemCard({
@@ -79,22 +79,21 @@ function FoodItemCard({
                     removing={removing}
                 />
             </CardFooter>
-
-            <Dialog open={isInfoOpen} onOpenChange={setInfoOpen}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>{item.name}</DialogTitle>
-                    </DialogHeader>
-                    <img
-                        src={item.image_url ?? "https://placehold.co/640x360"}
-                        alt={item.name}
-                        className="w-full rounded-md object-cover aspect-video"
-                    />
-                    <p>Category: {item.category}</p>
-                    <p>Quantity: {item.quantity ?? 1}</p>
-                    {item.expiration_date && <p>Expiration: {item.expiration_date}</p>}
-                </DialogContent>
-            </Dialog>
+            <ItemDetailsDialog
+                item={item}
+                open={isInfoOpen}
+                onOpenChange={setInfoOpen}
+                isEditOpen={isEditOpen}
+                onEditOpenChange={onEditOpenChange}
+                onEditStart={onEditStart}
+                onEdit={onEdit}
+                isSaving={isSaving}
+                isDeleteOpen={isDeleteOpen}
+                onDeleteOpenChange={onDeleteOpenChange}
+                onDeleteStart={onDeleteStart}
+                onRemove={onRemove}
+                removing={removing}
+            />
         </Card>
     );
 }
