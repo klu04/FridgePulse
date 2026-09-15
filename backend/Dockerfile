@@ -36,6 +36,7 @@ COPY ./uv.lock ./pyproject.toml ./alembic.ini ./
 COPY ./entrypoint.sh ./prestart.sh ./
 
 COPY ./app ./app
+COPY ./alembic ./alembic
 
 RUN chmod +x ./entrypoint.sh ./prestart.sh
 
