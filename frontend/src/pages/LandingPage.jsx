@@ -61,50 +61,75 @@ function LandingPage() {
         navigate('/dashboard')
     }
     return (
-        <main className="flex flex-col justify-center mx-auto w-full max-w-4xl px-6 py-20 lg:min-h-dvh">
-            {/* Hero */}
-            <div className="flex flex-col gap-5 items-center flex-center justify-center">
+        <>
+            <main className="flex flex-1 flex-col justify-center mx-auto w-full max-w-4xl px-6 py-20">
+                {/* Hero */}
+                <div className="flex flex-col gap-5 items-center flex-center justify-center">
 
-                <div className="flex flex-col gap-8 items-center flex-1">
-                    <Refrigerator className="size-15 w-25 text-gray-600" />
-                    <h1 className="text-center text-2xl font-bold text-gray-600">
-                        ShelfLife
-                    </h1>
-                    <p className="text-xl text-center text-gray-600 max-w-2xl">
-                        Track your groceries and reduce food waste!
-                    </p>
-                    <div className="flex flex-row gap-4">
-                        <Link to="/login">
-                            <Button variant="outline" size="lg">Log In</Button>
-                        </Link>
-                        <Link to="/signup">
-                            <Button variant="outline" size="lg">Sign Up</Button>
-                        </Link>
-                        <Button onClick={handleTryOffline}>Try Offline</Button>
+                    <div className="flex flex-col gap-8 items-center flex-1">
+                        <Refrigerator className="size-15 w-25 text-gray-600" />
+                        <h1 className="text-center text-2xl font-bold text-gray-600">
+                            ShelfLife
+                        </h1>
+                        <p className="text-xl text-center text-gray-600 max-w-2xl">
+                            Track your groceries and reduce food waste!
+                        </p>
+                        <div className="flex flex-row gap-4">
+                            <Link to="/login">
+                                <Button variant="outline" size="lg">Log In</Button>
+                            </Link>
+                            <Link to="/signup">
+                                <Button variant="outline" size="lg">Sign Up</Button>
+                            </Link>
+                            <Button onClick={handleTryOffline}>Try Offline</Button>
+                        </div>
+                    </div>
+
+                    <div className="flex flex-col mt-5">
+                        <h2 className="mx-auto mb-5 w-1/4 max-w-md border-t py-5 text-center text-xl font-semibold text-gray-600">Features</h2>
+                        <ItemGroup className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {features.map((feature) => (
+                                <Item key={feature.name} role="listitem" variant="muted" className="p-6 items-start content-start">
+                                    <ItemHeader className="mb-2">
+                                        <img
+                                            src={feature.image}
+                                            alt={feature.name}
+                                            className="w-14 h-14 rounded-sm object-cover"
+                                        />
+                                    </ItemHeader>
+                                    <ItemContent>
+                                        <ItemTitle>{feature.name}</ItemTitle>
+                                        <ItemDescription className="line-clamp-none text-gray-600">{feature.description}</ItemDescription>
+                                    </ItemContent>
+                                </Item>
+                            ))}
+                        </ItemGroup>
                     </div>
                 </div>
-
-                <div className="flex flex-col">
-                    <ItemGroup className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {features.map((feature) => (
-                            <Item key={feature.name} role="listitem" variant="muted" className="p-6 items-start content-start">
-                                <ItemHeader className="mb-2">
-                                    <img
-                                        src={feature.image}
-                                        alt={feature.name}
-                                        className="w-14 h-14 rounded-sm object-cover"
-                                    />
-                                </ItemHeader>
-                                <ItemContent>
-                                    <ItemTitle>{feature.name}</ItemTitle>
-                                    <ItemDescription className="line-clamp-none text-gray-600">{feature.description}</ItemDescription>
-                                </ItemContent>
-                            </Item>
-                        ))}
-                    </ItemGroup>
+            </main>
+            <footer className="border-t px-5 py-5 text-center text-gray-600">
+                <div className="flex flex-col gap-1">
+                    <small>
+                        Licensed under the{" "}
+                        <a
+                            className="underline cursor-pointer hover:text-gray-900"
+                            href="https://www.apache.org/licenses/LICENSE-2.0"
+                        >
+                            Apache License, Version 2.0
+                        </a>
+                    </small>
+                    <small>
+                        Icons (Features) by{" "}
+                        <a
+                            className="underline cursor-pointer hover:text-gray-900"
+                            href="https://icons8.com"
+                        >
+                            Icons8
+                        </a>
+                    </small>
                 </div>
-            </div>
-        </main>
+            </footer>
+        </>
     );
 }
 
