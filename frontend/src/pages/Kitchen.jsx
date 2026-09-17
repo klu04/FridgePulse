@@ -30,7 +30,6 @@ function Kitchen() {
         }
 
         const data = await apiFetch(FOOD_ITEMS_URL);
-        console.log(data['data']);
         setItems(data['data']);
       } catch (err) {
         setError(err.message);
