@@ -1,7 +1,7 @@
 [project]
 name = "backend"
 version = "0.1.0"
-description = "Add your description here"
+description = "Backend of ShelfLife"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
@@ -9,7 +9,6 @@ dependencies = [
     "asyncpg==0.31.0",
     "coverage==7.13.5",
     "fastapi[standard]==0.135.3",
-    "google-cloud-vision==3.13.0",
     "greenlet==3.5.1",
     "httpx==0.28.1",
     "pwdlib[argon2]==0.3.0",
