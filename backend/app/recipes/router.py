@@ -22,7 +22,7 @@ router = APIRouter()
 
 
 def calculate_expiration(user_items):
-    """calculates expiration status of food items. Retuns a list of food items that are expiring within 3 days."""
+    """calculates expiration status of food items. Returns a list of food items that are expiring within 3 days."""
     today = date.today()
     food_items = []
     for item in user_items:
