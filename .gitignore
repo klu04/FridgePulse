@@ -13,3 +13,6 @@ venv/
 
 # ruff
 .ruff_cache/
+
+# FastAPI Cloud frontend bundle
+/backend/app/frontend/

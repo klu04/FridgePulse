@@ -1,0 +1,82 @@
+name: Deploy to FastAPI Cloud
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fastapi-cloud-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 11.25.0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Install frontend dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: frontend
+
+      - name: Build frontend for FastAPI
+        run: pnpm exec vite build --outDir ../backend/app/frontend --emptyOutDir
+        working-directory: frontend
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version-file: backend/.python-version
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          version: latest
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+
+      - name: Install backend dependencies
+        run: uv sync --locked
+        working-directory: backend
+
+      - name: Prepare Neon database
+        run: uv run ./prestart.sh
+        working-directory: backend
+        env:
+          PROJECT_NAME: ${{ vars.PROJECT_NAME || 'ShelfLife' }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          MIGRATION_DATABASE_URL: ${{ secrets.MIGRATION_DATABASE_URL }}
+          FIRST_SUPERUSER_EMAIL: ${{ vars.FIRST_SUPERUSER_EMAIL }}
+          FIRST_SUPERUSER_PASSWORD: ${{ secrets.FIRST_SUPERUSER_PASSWORD }}
+          USERS_OPEN_REGISTRATION: ${{ vars.USERS_OPEN_REGISTRATION || 'false' }}
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          SPOONACULAR_API_KEY: ${{ secrets.SPOONACULAR_API_KEY || '' }}
+          RECIPES_URL: ${{ vars.RECIPES_URL || 'https://api.spoonacular.com/recipes/findByIngredients' }}
+
+      - name: Deploy to FastAPI Cloud
+        run: uv run fastapi deploy
+        working-directory: backend
+        env:
+          FASTAPI_CLOUD_TOKEN: ${{ secrets.FASTAPI_CLOUD_TOKEN }}
+          FASTAPI_CLOUD_APP_ID: ${{ secrets.FASTAPI_CLOUD_APP_ID }}

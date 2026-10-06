@@ -13,12 +13,6 @@ from app.routers import api_router
 
 FRONTEND_DIR = Path(__file__).parent / "frontend"
 
-# Configure logging BEFORE anything else
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-)
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
