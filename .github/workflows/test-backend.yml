@@ -27,6 +27,7 @@ jobs:
       USERS_OPEN_REGISTRATION: "true"
       SPOONACULAR_API_KEY: disabled-in-ci
       RECIPES_URL: http://127.0.0.1:9/disabled
+      SECRET_KEY: Tr1EbnySdE7remsKb7KB5EgiaQgOGbbRmo616gboO9maPGzCQpFD0GzSMYMvC3ad
     steps:
       - name: Checkout
         uses: actions/checkout@v7
