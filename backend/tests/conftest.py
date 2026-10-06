@@ -6,7 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 from sqlalchemy.pool import NullPool
 
 from app.config import settings
-from app.database.db import Base, get_db
+from app.database._model_base import Base
+from app.database.db import get_db
 from app.main import app
 
 pytest_plugins = ["anyio"]
@@ -18,9 +19,23 @@ def anyio_backend() -> str:
     return "asyncio"
 
 
+@pytest.fixture(autouse=True)
+def block_recipe_api_calls(monkeypatch: pytest.MonkeyPatch) -> None:
+    async def reject_recipe_api_call(*args, **kwargs):
+        raise AssertionError("Spoonacular API calls are disabled during tests")
+
+    monkeypatch.setattr(
+        "app.recipes.router.get_recipes_from_ingredients",
+        reject_recipe_api_call,
+    )
+
+
 @pytest.fixture(scope="session")
 def test_engine_fixture():
     """Create test database engine"""
+    if settings.TEST_DATABASE_URL is None:
+        raise RuntimeError("TEST_DATABASE_URL must be set to run backend tests")
+
     engine = create_async_engine(
         settings.TEST_DATABASE_URL,
         poolclass=NullPool,

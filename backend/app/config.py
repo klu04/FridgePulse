@@ -26,7 +26,7 @@ class Settings(BaseSettings):
     USERS_OPEN_REGISTRATION: bool
 
     # Test PostgreSQL DB
-    # TEST_DATABASE_URL: str
+    TEST_DATABASE_URL: str | None = None
 
     # Auth
     SECRET_KEY: SecretStr = secrets.token_urlsafe(32)
@@ -36,7 +36,7 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
 
     # Frontend
-    FRONTEND_URL: str = "http://localhost:5173"
+    FRONTEND_HOST: str = "http://localhost:5173"
 
     # Recipe APIs
     SPOONACULAR_API_KEY: str

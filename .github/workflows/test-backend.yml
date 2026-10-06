@@ -1,0 +1,73 @@
+name: Test Backend
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test-backend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      COMPOSE_PROJECT_NAME: shelflife-ci-${{ github.run_id }}-${{ github.run_attempt }}
+      PROJECT_NAME: ShelfLife
+      POSTGRES_SERVER: localhost
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: shelflife
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      TEST_DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/shelflife
+      FIRST_SUPERUSER_EMAIL: admin@example.test
+      FIRST_SUPERUSER_PASSWORD: test-password
+      USERS_OPEN_REGISTRATION: "true"
+      SPOONACULAR_API_KEY: disabled-in-ci
+      RECIPES_URL: http://127.0.0.1:9/disabled
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version-file: backend/.python-version
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: latest
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+
+      - name: Start PostgreSQL with Docker Compose
+        run: docker compose -f compose.yml -f compose.override.yml up -d --wait db
+
+      - name: Install backend dependencies
+        run: uv sync --locked
+        working-directory: backend
+
+      - name: Run backend tests with coverage
+        run: >-
+          uv run --locked pytest tests
+          --cov=app
+          --cov-report=term-missing
+          --cov-report=html:htmlcov
+        working-directory: backend
+
+      - name: Stop Docker Compose services
+        if: always()
+        run: docker compose -f compose.yml down -v --remove-orphans
+
+      - name: Store coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage-${{ github.sha }}
+          path: backend/htmlcov
+          if-no-files-found: ignore

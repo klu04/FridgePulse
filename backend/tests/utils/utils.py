@@ -3,6 +3,12 @@ import string
 
 from httpx import AsyncClient
 
+from app.config import settings
+
+
+def api_url(path: str) -> str:
+    return f"{settings.API_V1_URL}/{path.lstrip('/')}"
+
 
 async def create_test_user(
     client: AsyncClient,
@@ -11,7 +17,7 @@ async def create_test_user(
     password: str = "test1234",
 ) -> dict:
     response = await client.post(
-        "v1/users",
+        api_url("users"),
         json={
             "name": name,
             "email": email,
@@ -29,7 +35,7 @@ async def login_user(
     password: str = "test1234",
 ) -> str:
     response = await client.post(
-        "v1/tokens",
+        api_url("tokens"),
         data={
             "username": email,
             "password": password,
@@ -41,7 +47,6 @@ async def login_user(
 
 
 def user_auth_header(token: str) -> dict[str, str]:
-
     return {"Authorization": f"Bearer {token}"}
 
 

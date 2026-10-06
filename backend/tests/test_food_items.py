@@ -5,6 +5,7 @@ import pytest
 from httpx import AsyncClient
 
 from tests.utils.utils import (
+    api_url,
     create_test_user,
     login_user,
     random_string,
@@ -21,7 +22,7 @@ async def test_create_food_item_success(client: AsyncClient):
     headers = user_auth_header(token)
 
     response = await client.post(
-        "/v1/food-items",
+        api_url("food-items"),
         json={
             "name": "Whole Milk",
             "brand": "Horizon Organic",
@@ -53,7 +54,9 @@ async def test_create_food_item_name_only_success(client: AsyncClient):
     headers = user_auth_header(token)
 
     response = await client.post(
-        "v1/food-items", json={"name": "Whole Milk", "quantity": 1.00}, headers=headers
+        api_url("food-items"),
+        json={"name": "Whole Milk", "quantity": 1.00},
+        headers=headers,
     )
     assert response.status_code == 201
     content = response.json()
@@ -70,7 +73,7 @@ async def test_create_food_item_duplicate_barcode(client: AsyncClient):
     headers = user_auth_header(token)
 
     add_item_1 = await client.post(
-        "/v1/food-items",
+        api_url("food-items"),
         json={
             "name": "Whole Milk",
             "brand": "Horizon Organic",
@@ -88,7 +91,7 @@ async def test_create_food_item_duplicate_barcode(client: AsyncClient):
     assert content["user_id"] == user["id"]
 
     add_item_2 = await client.post(
-        "/v1/food-items",
+        api_url("food-items"),
         json={
             "name": "Whole Milk",
             "brand": "Horizon Organic",
@@ -108,9 +111,8 @@ async def test_create_food_item_duplicate_barcode(client: AsyncClient):
 
 @pytest.mark.anyio
 async def test_create_food_item_unauthorized(client: AsyncClient):
-
     response = await client.post(
-        "/v1/food-items",
+        api_url("food-items"),
         json={
             "name": "Whole Milk",
             "brand": "Horizon Organic",
@@ -132,9 +134,8 @@ async def test_read_food_item_success(client: AsyncClient):
     token = await login_user(client)
     headers = user_auth_header(token)
 
-    # Create food item
     add_food_item = await client.post(
-        "/v1/food-items",
+        api_url("food-items"),
         json={
             "name": "Whole Milk",
             "brand": "Horizon Organic",
@@ -149,7 +150,7 @@ async def test_read_food_item_success(client: AsyncClient):
 
     food_item_id = add_food_item.json()["id"]
 
-    response = await client.get(f"v1/food-items/{food_item_id}", headers=headers)
+    response = await client.get(api_url(f"food-items/{food_item_id}"), headers=headers)
     assert response.status_code == 200
 
     content = response.json()
@@ -169,7 +170,7 @@ async def test_read_food_item_not_found(client: AsyncClient):
 
     food_item_id = uuid4()
 
-    response = await client.get(f"v1/food-items/{food_item_id}", headers=headers)
+    response = await client.get(api_url(f"food-items/{food_item_id}"), headers=headers)
     assert response.status_code == 404
     assert response.json()["detail"] == "Food item not found."
 
@@ -180,10 +181,9 @@ async def test_read_food_items_success(client: AsyncClient):
     token = await login_user(client)
     headers = user_auth_header(token)
 
-    # Create 5 random food items
     for i in range(5):
         add_food_item = await client.post(
-            "/v1/food-items",
+            api_url("food-items"),
             json={
                 "name": random_string(),
                 "brand": random_string(),
@@ -197,7 +197,7 @@ async def test_read_food_items_success(client: AsyncClient):
         )
         assert add_food_item.status_code == 201
 
-    response = await client.get("v1/food-items", headers=headers)
+    response = await client.get(api_url("food-items"), headers=headers)
     assert response.status_code == 200
     content = response.json()["data"]
     assert len(content) >= 5
@@ -210,7 +210,7 @@ async def test_update_food_item_success(client: AsyncClient):
     headers = user_auth_header(token)
 
     add_food_item = await client.post(
-        "/v1/food-items",
+        api_url("food-items"),
         json={
             "name": "Sourdough Bread",
             "brand": "Dave's Killer Bread",
@@ -236,7 +236,7 @@ async def test_update_food_item_success(client: AsyncClient):
     }
 
     response = await client.patch(
-        f"/v1/food-items/{food_item_id}", json=updated_data, headers=headers
+        api_url(f"food-items/{food_item_id}"), json=updated_data, headers=headers
     )
 
     assert response.status_code == 200
@@ -257,7 +257,7 @@ async def test_partial_update_food_item_success(client: AsyncClient):
     headers = user_auth_header(token)
 
     add_food_item = await client.post(
-        "/v1/food-items",
+        api_url("food-items"),
         json={
             "name": random_string(),
             "quantity": 1.00,
@@ -274,25 +274,23 @@ async def test_partial_update_food_item_success(client: AsyncClient):
         "quantity": 2.00,
     }
     response = await client.patch(
-        f"v1/food-items/{food_item_id}", json=updated_data, headers=headers
+        api_url(f"food-items/{food_item_id}"), json=updated_data, headers=headers
     )
 
     assert response.status_code == 200
     content = response.json()
     assert content["name"] == updated_data["name"]
     assert Decimal(content["quantity"]) == Decimal(updated_data["quantity"])
-
     assert content["unit"] == original_data["unit"]
 
 
 @pytest.mark.anyio
 async def test_partial_update_food_item_other_user_item(client: AsyncClient):
-    # User 1
-    await create_test_user(client, email_address="newuser@gmail.com")
-    token_1 = await login_user(client, email_address="newuser@gmail.com")
+    await create_test_user(client, email="newuser@gmail.com")
+    token_1 = await login_user(client, email="newuser@gmail.com")
 
     add_food_item = await client.post(
-        "/v1/food-items",
+        api_url("food-items"),
         json={
             "name": random_string(),
             "quantity": 1.00,
@@ -302,12 +300,11 @@ async def test_partial_update_food_item_other_user_item(client: AsyncClient):
     )
     food_item_id = add_food_item.json()["id"]
 
-    # User 2
-    await create_test_user(client, email_address="newuser2@gmail.com")
-    token_2 = await login_user(client, email_address="newuser2@gmail.com")
+    await create_test_user(client, email="newuser2@gmail.com")
+    token_2 = await login_user(client, email="newuser2@gmail.com")
 
     response = await client.patch(
-        f"/v1/food-items/{food_item_id}",
+        api_url(f"food-items/{food_item_id}"),
         json={
             "name": random_string(),
             "quantity": 1.00,
@@ -327,7 +324,7 @@ async def test_delete_food_item_success(client: AsyncClient):
     headers = user_auth_header(token)
 
     add_food_item = await client.post(
-        "/v1/food-items",
+        api_url("food-items"),
         json={
             "name": random_string(),
             "quantity": 1.00,
@@ -338,7 +335,7 @@ async def test_delete_food_item_success(client: AsyncClient):
     food_item_id = add_food_item.json()["id"]
 
     response = await client.delete(
-        f"/v1/food-items/{food_item_id}",
+        api_url(f"food-items/{food_item_id}"),
         headers=headers,
     )
 
@@ -352,7 +349,7 @@ async def test_delete_food_item_not_found(client: AsyncClient):
     headers = user_auth_header(token)
 
     await client.post(
-        "/v1/food-items",
+        api_url("food-items"),
         json={
             "name": random_string(),
             "quantity": 1.00,
@@ -363,7 +360,7 @@ async def test_delete_food_item_not_found(client: AsyncClient):
     food_item_id = uuid4()
 
     response = await client.delete(
-        f"/v1/food-items/{food_item_id}",
+        api_url(f"food-items/{food_item_id}"),
         headers=headers,
     )
 
@@ -373,12 +370,11 @@ async def test_delete_food_item_not_found(client: AsyncClient):
 
 @pytest.mark.anyio
 async def test_delete_food_item_other_user_item(client: AsyncClient):
-    # Create user 1 and add a food item
-    await create_test_user(client, email_address="newuser@gmail.com")
-    token_1 = await login_user(client, email_address="newuser@gmail.com")
+    await create_test_user(client, email="newuser@gmail.com")
+    token_1 = await login_user(client, email="newuser@gmail.com")
 
     add_food_item = await client.post(
-        "/v1/food-items",
+        api_url("food-items"),
         json={
             "name": random_string(),
             "quantity": 1.00,
@@ -388,12 +384,11 @@ async def test_delete_food_item_other_user_item(client: AsyncClient):
     )
     food_item_id = add_food_item.json()["id"]
 
-    # Create user 2 and attempt to delete user 1's food item
-    await create_test_user(client, email_address="newuser2@gmail.com")
-    token_2 = await login_user(client, email_address="newuser2@gmail.com")
+    await create_test_user(client, email="newuser2@gmail.com")
+    token_2 = await login_user(client, email="newuser2@gmail.com")
 
     response = await client.delete(
-        f"/v1/food-items/{food_item_id}",
+        api_url(f"food-items/{food_item_id}"),
         headers=user_auth_header(token_2),
     )
 

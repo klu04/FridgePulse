@@ -1,13 +1,17 @@
 import logging
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 import app.database.models
 from app.config import settings
 from app.database.db import engine
 from app.routers import api_router
+
+FRONTEND_DIR = Path(__file__).parent / "frontend"
 
 # Configure logging BEFORE anything else
 logging.basicConfig(
@@ -25,26 +29,13 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title=settings.PROJECT_NAME, lifespan=lifespan)
 
-origins = [
-    "http://127.0.0.1:5173",
-    "http://localhost",
-    "http://localhost:5173",
-    "https://localhost",
-    "https://localhost:5173",
-    "http://0.0.0.0:5173",
-    "https://0.0.0.0:5173",
-    "http://192.168.50.85:5173",
-    "https://192.168.50.85:5173",
-    "http://192.168.50.98:5173",
-    "http://192.168.50.98:5173",
-    "https://dosage-matchless-suspend.ngrok-free.dev",
-]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=[settings.FRONTEND_HOST],
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 app.include_router(api_router, prefix=settings.API_V1_URL)
+if FRONTEND_DIR.is_dir():
+    app.mount("/", StaticFiles(directory=FRONTEND_DIR, html=True), name="frontend")
