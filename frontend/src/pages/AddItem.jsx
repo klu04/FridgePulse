@@ -178,7 +178,7 @@ function AddItem() {
         <div className="space-y-1">
           <label className="text-sm font-medium text-gray-700" htmlFor="image_url">Image URL</label>
           <input
-            id="image_url" name="image_url" type="text" maxLength={30}
+            id="image_url" name="image_url" type="text"
             value={form.image_url} onChange={handleChange} placeholder="http://food-image.com"
             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
           />
