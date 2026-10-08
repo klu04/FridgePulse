@@ -1,4 +1,4 @@
-FROM ghcr.io/pnpm/pnpm:11.25.0 AS build
+FROM ghcr.io/pnpm/pnpm:12.10.1 AS build
 
 WORKDIR /app
 
