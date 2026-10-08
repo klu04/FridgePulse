@@ -21,22 +21,16 @@ class ImageClassificationPipeline {
     }
 }
 
-const FOOD_LABELS = [
-    // Fruits
-    "apple", "apricot", "banana", "blackberry", "blueberry",
-    "cantaloupe", "cherry", "coconut", "cranberry", "date",
-    "fig", "durian", "grapefruit", "grapes", "guava", "kiwi",
-    "lemon", "lime", "mango", "nectarine", "orange",
-    "papaya", "passionfruit", "peach", "pear", "persimmon",
-    "pineapple", "plum", "pomegranate", "raspberry", "strawberry",
-    "tangerine", "watermelon",
-    // Vegetables
-    "artichoke", "asparagus", "beet", "bell pepper", "broccoli",
-    "brussels sprout", "cabbage", "carrot", "cauliflower", "celery",
-    "corn", "cucumber", "eggplant", "garlic", "ginger",
-    "green beans", "kale", "leek", "lettuce", "mushroom",
-    "onion", "parsnip", "potato", "pumpkin", "radish",
-    "spinach", "sweet potato", "tomato", "turnip", "zucchini"
+const PRODUCE_LABELS = [
+    "apple", "apricot", "avocado", "banana", "bell pepper",
+    "blackberry", "blueberry", "broccoli", "cabbage", "carrot",
+    "cauliflower", "celery", "cherry", "coconut", "corn",
+    "cucumber", "eggplant", "garlic", "grapes", "green beans",
+    "kiwi", "lemon", "lettuce", "lime", "mango",
+    "mushroom", "onion", "orange", "peach", "pear",
+    "peas", "pineapple", "plum", "potato", "pumpkin",
+    "raspberry", "spinach", "strawberry", "sweet potato", "tomato",
+    "watermelon", "zucchini"
 ];
 
 self.onmessage = async (event) => {
@@ -57,12 +51,14 @@ self.onmessage = async (event) => {
         try {
             const classifier = await ImageClassificationPipeline.getInstance();
             const imageUrl = URL.createObjectURL(payload.image);
-
-            const predictions = await classifier(imageUrl, FOOD_LABELS);
-
-            URL.revokeObjectURL(imageUrl);
-
-            self.postMessage({ type: "RESULT", payload: predictions });
+            try {
+                const predictions = await classifier(imageUrl, PRODUCE_LABELS, {
+                    hypothesis_template: "This is a photo of {}"
+                });
+                self.postMessage({ type: "RESULT", payload: predictions });
+            } finally {
+                URL.revokeObjectURL(imageUrl);
+            }
         } catch (error) {
             self.postMessage({ type: "ERROR", payload: `Classification failed: ${error.message}` });
         }

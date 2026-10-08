@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 function ImageScanner() {
   const navigate = useNavigate();
   const videoRef = useRef(null);
+  const guideRef = useRef(null);
   const canvasRef = useRef(null);
   const streamRef = useRef(null);
   const workerRef = useRef(null);
@@ -18,22 +19,52 @@ function ImageScanner() {
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const [cameraKey, setCameraKey] = useState(0);
+  const [cameraRequesting, setCameraRequesting] = useState(false);
 
   async function handleCapture() {
-    if (!videoRef.current || !canvasRef.current || !workerRef.current) return;
-
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    const ctx = canvas.getContext("2d");
-    if (ctx) ctx.drawImage(video, 0, 0);
+    if (modelLoading || detecting || !videoRef.current || !guideRef.current || !canvasRef.current || !workerRef.current) return;
 
     setDetecting(true);
     setError(null);
     setResult(null);
 
     try {
+      const video = videoRef.current;
+      const guide = guideRef.current;
+      const canvas = canvasRef.current;
+      const videoBounds = video.getBoundingClientRect();
+      const guideBounds = guide.getBoundingClientRect();
+      if (!video.videoWidth || !video.videoHeight) {
+        throw new Error("The camera frame is not ready.");
+      }
+
+      const scale = Math.max(
+        videoBounds.width / video.videoWidth,
+        videoBounds.height / video.videoHeight
+      );
+      const renderedWidth = video.videoWidth * scale;
+      const renderedHeight = video.videoHeight * scale;
+      const sourceX = Math.max(0, Math.min(
+        video.videoWidth,
+        (guideBounds.left - videoBounds.left - (videoBounds.width - renderedWidth) / 2) / scale
+      ));
+      const sourceY = Math.max(0, Math.min(
+        video.videoHeight,
+        (guideBounds.top - videoBounds.top - (videoBounds.height - renderedHeight) / 2) / scale
+      ));
+      const sourceWidth = Math.min(guideBounds.width / scale, video.videoWidth - sourceX);
+      const sourceHeight = Math.min(guideBounds.height / scale, video.videoHeight - sourceY);
+
+      if (sourceWidth <= 0 || sourceHeight <= 0) {
+        throw new Error("The guide is outside the camera frame.");
+      }
+
+      canvas.width = 320;
+      canvas.height = 320;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("Failed to prepare the image for classification.");
+      ctx.drawImage(video, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, canvas.width, canvas.height);
+
       const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.85));
       if (workerRef.current && blob) {
         workerRef.current.postMessage({ type: "CLASSIFY", payload: { image: blob } });
@@ -41,7 +72,7 @@ function ImageScanner() {
         throw new Error("Failed to generate image blob.");
       }
     } catch (err) {
-        console.error("Image capture failed:", err);
+      console.error("Image capture failed:", err);
       setError("Failed to capture image. Please try again.");
       setDetecting(false);
     }
@@ -55,9 +86,26 @@ function ImageScanner() {
     setCameraKey((k) => k + 1); // Forces React to recreate the <video> DOM node
   }
 
-  function handleRetryCamera() {
-    setCameraError(null);
-    setCameraKey((k) => k + 1);
+  async function handleRetryCamera() {
+    if (cameraRequesting) return;
+
+    setCameraRequesting(true);
+    try {
+      streamRef.current = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "environment" },
+        audio: false,
+      });
+      setCameraError(null);
+      setCameraKey((key) => key + 1);
+    } catch (err) {
+      console.error("Camera retry error:", err);
+      const permissionDenied = err.name === "NotAllowedError" || err.name === "PermissionDeniedError";
+      setCameraError(permissionDenied
+        ? "Camera access was denied. Allow it in your browser's site settings, then try again."
+        : "Camera permission denied or unavailable.");
+    } finally {
+      setCameraRequesting(false);
+    }
   }
 
   // Web Worker Setup for vision model
@@ -76,15 +124,13 @@ function ImageScanner() {
         setModelLoading(false);
       } else if (type === "RESULT") {
         if (Array.isArray(payload) && payload.length > 0) {
-          const top = payload[0];
-          const cleanName = top.label
-            ? top.label.replace(/_/g, " ").split(",")[0].trim().toLowerCase()
-            : "unknown";
-
-          if (top.score >= 0.4) {
-            setResult({ name: cleanName, confidence: top.score });
+          const candidates = [...new Set(payload.slice(0, 3)
+            .map(({ label }) => label?.replace(/_/g, " ").split(",")[0].trim().toLowerCase())
+            .filter(Boolean))];
+          if (candidates.length > 0) {
+            setResult({ name: candidates[0], candidates });
           } else {
-            setError("No clear object detected. Try again.");
+            setError("No results returned from the model.");
           }
         } else {
           setError("No results returned from the model.");
@@ -118,7 +164,7 @@ function ImageScanner() {
   }, []);
 
 
-  const shouldCameraBeActive = !modelLoading && !modelError && !result && !cameraError && !error;
+  const shouldCameraBeActive = !modelError && !result && !cameraError && !error;
 
   // Camera Lifecycle (Syncs with browser's external media system)
   useEffect(() => {
@@ -126,14 +172,16 @@ function ImageScanner() {
 
     const videoNode = videoRef.current;
     let ignore = false; // Prevents race conditions on rapid unmounts/remounts
-    let localStream = null;
+    let localStream = streamRef.current;
 
     async function setupCamera() {
       try {
-        localStream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: "environment" },
-          audio: false,
-        });
+        if (!localStream) {
+          localStream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: "environment" },
+            audio: false,
+          });
+        }
 
         if (!ignore && videoNode) {
           streamRef.current = localStream;
@@ -152,7 +200,7 @@ function ImageScanner() {
     return () => {
       ignore = true; // Mark as stale so async setupCamera ignores the result
       if (localStream) localStream.getTracks().forEach((t) => t.stop());
-      streamRef.current = null;
+      if (streamRef.current === localStream) streamRef.current = null;
       if (videoNode) videoNode.srcObject = null;
     };
   }, [shouldCameraBeActive, cameraKey]);
@@ -176,7 +224,11 @@ function ImageScanner() {
 
           {/* Viewfinder */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="w-72 h-72 border-2 border-emerald-400 rounded-xl opacity-70" />
+            <div
+              ref={guideRef}
+              className="border-2 border-emerald-400 rounded-xl opacity-80"
+              style={{ width: "min(72vw, 42vh, 18rem)", aspectRatio: "1 / 1" }}
+            />
           </div>
 
           {/* Back button */}
@@ -187,6 +239,16 @@ function ImageScanner() {
           >
             &larr;
           </button>
+
+          {modelLoading && (
+            <div
+              role="status"
+              aria-live="polite"
+              className="absolute top-4 left-1/2 -translate-x-1/2 rounded-full bg-black/60 px-4 py-2 text-sm text-white"
+            >
+              Preparing scanner... {modelProgress}%
+            </div>
+          )}
 
           {/* Detecting overlay */}
           {detecting && (
@@ -200,10 +262,10 @@ function ImageScanner() {
           <div className="absolute bottom-0 left-0 right-0 p-6 bg-linear-to-t from-black/70 to-transparent">
             <Button
               onClick={handleCapture}
-              disabled={detecting}
+              disabled={detecting || modelLoading}
               className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-3 rounded-xl disabled:opacity-50"
             >
-              {detecting ? "Thinking..." : "Capture & Identify"}
+              {modelLoading ? "Preparing scanner..." : detecting ? "Identifying..." : "Capture & Identify"}
             </Button>
           </div>
         </div>
@@ -241,8 +303,12 @@ function ImageScanner() {
             <div className="rounded-lg border border-yellow-300 bg-yellow-50 p-4 text-center space-y-2">
               <p className="text-yellow-800 font-medium">Camera Unavailable</p>
               <p className="text-sm text-yellow-700">{cameraError}</p>
-              <Button onClick={handleRetryCamera} className="mt-2 bg-yellow-600 hover:bg-yellow-700 text-white text-sm py-1 px-3 rounded">
-                Try Again
+              <Button
+                onClick={handleRetryCamera}
+                disabled={cameraRequesting}
+                className="mt-2 bg-yellow-600 hover:bg-yellow-700 text-white text-sm py-1 px-3 rounded"
+              >
+                {cameraRequesting ? "Requesting camera..." : "Try Again"}
               </Button>
             </div>
           )}
@@ -258,10 +324,21 @@ function ImageScanner() {
 
           {result && (
             <div className="border border-emerald-300 bg-emerald-50 p-5 rounded-lg space-y-4 text-center">
-              <h2 className="text-xl font-bold text-emerald-800">
-                Detected: <span className="capitalize">{result.name}</span>
-              </h2>
-              <p className="text-sm text-gray-600">Confidence: {Math.round(result.confidence * 100)}%</p>
+              <h2 className="text-xl font-bold text-emerald-800">Suggested produce</h2>
+              <div role="group" aria-label="Choose the closest match" className="flex flex-wrap justify-center gap-2">
+                {result.candidates.map((candidate) => (
+                  <Button
+                    key={candidate}
+                    type="button"
+                    variant={result.name === candidate ? "default" : "outline"}
+                    aria-pressed={result.name === candidate}
+                    onClick={() => setResult((current) => ({ ...current, name: candidate }))}
+                    className="capitalize"
+                  >
+                    {candidate}
+                  </Button>
+                ))}
+              </div>
               <div className="flex gap-3 justify-center">
                 <Button
                   onClick={() => navigate("/add-item", { state: { name: result.name } })}
