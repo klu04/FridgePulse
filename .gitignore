@@ -14,5 +14,5 @@ venv/
 # ruff
 .ruff_cache/
 
-# FastAPI Cloud frontend bundle
+# FastAPI Cloud 
 /backend/app/frontend/
