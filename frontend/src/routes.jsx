@@ -1,6 +1,5 @@
 import { createBrowserRouter } from "react-router-dom";
 import { AppRoute, PublicRoute } from "@/components/auth/ProtectedRoute";
-import AuthLayout from "@/components/layouts/AuthLayout";
 import RootLayout from "@/components/layouts/RootLayout";
 import LandingPage from "@/pages/LandingPage";
 
@@ -20,7 +19,9 @@ export const router = createBrowserRouter([
                 Component: AppRoute,
                 children: [
                     {
-                        Component: AuthLayout,
+                        lazy: async () => ({
+                            Component: (await import("@/components/layouts/AuthLayout")).default,
+                        }),
                         children: [
                             { path: "dashboard", lazy: () => import("@/pages/Dashboard") },
                             { path: "add-item", lazy: () => import("@/pages/AddItem") },
