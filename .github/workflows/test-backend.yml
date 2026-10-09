@@ -47,7 +47,7 @@ jobs:
           cache-dependency-glob: backend/uv.lock
 
       - name: Start PostgreSQL with Docker Compose
-        run: docker compose -f compose.yml -f compose.override.yml up -d --wait db
+        run: docker compose -f compose.yml -f compose.dev.yml up -d --wait db
 
       - name: Install backend dependencies
         run: uv sync --locked
