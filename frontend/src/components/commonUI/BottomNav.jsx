@@ -63,7 +63,7 @@ const BottomNav = ({ className }) => {
         <nav
             aria-label="Primary"
             className={cn(
-                "fixed inset-x-0 bottom-0 z-50 border-t bg-background pb-[env(safe-area-inset-bottom)] md:hidden",
+                "fixed inset-x-0 bottom-0 z-50 border-t bg-background pb-[calc(env(safe-area-inset-bottom)+0.5rem)] md:hidden",
                 className
             )}
         >
