@@ -20,7 +20,7 @@ export default defineConfig({
         description: "Track your groceries and reduce food waste!",
         theme_color: "#ffffff",
         background_color: "#ffffff",
-        display: "standalone",
+        display: "fullscreen",
         start_url: "/", 
         id: "/",   
         icons: [
