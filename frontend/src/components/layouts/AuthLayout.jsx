@@ -49,7 +49,7 @@ export default function AuthLayout() {
 
       <SidebarInset className="flex-1 flex flex-col min-w-0">
         <Header title={pageTitle} />
-        <main className="flex-1 overflow-x-hidden overflow-y-auto p-6 pb-[calc(4rem+env(safe-area-inset-bottom)+0.5rem)] md:pb-6 max-w-full">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto px-6 pt-4 pb-[calc(4rem+env(safe-area-inset-bottom)+0.5rem)] md:p-6 max-w-full">
           <GuestBanner />
           <Outlet />
         </main>

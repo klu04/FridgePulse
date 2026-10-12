@@ -12,7 +12,7 @@ export default defineConfig({
     VitePWA({
       registerType: "autoUpdate",
       devOptions: {
-        enabled: true,
+        enabled: false,
       },
       manifest: {
         name: "ShelfLife",
@@ -20,9 +20,8 @@ export default defineConfig({
         description: "Track your groceries and reduce food waste!",
         theme_color: "#ffffff",
         background_color: "#ffffff",
-        display_override: ["fullscreen", "standalone"],
-        display: "fullscreen",
-        start_url: "/", 
+        display: "standalone",
+        start_url: "/",
         id: "/",   
         icons: [
           {
@@ -89,7 +88,6 @@ export default defineConfig({
   },
   optimizeDeps: { exclude: ['@huggingface/transformers'] },
   server: {
-    allowedHosts: ['dosage-matchless-suspend.ngrok-free.dev'],
     proxy: {
       '/api': {
         target: process.env.VITE_BACKEND_URL || 'http://backend:8000',
@@ -101,6 +99,5 @@ export default defineConfig({
       'Cross-Origin-Embedder-Policy': 'credentialless', 
     },
     host: true,
-
   }
 });

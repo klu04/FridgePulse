@@ -6,7 +6,7 @@ const Header = ({title}) => {
     const { logout, user } = useAuthContext();
 
     return (
-        <header className="sticky top-0 z-40 w-full border-b bg-background pt-[calc(env(safe-area-inset-top)+0.5rem)] md:hidden">
+        <header className="sticky top-0 z-40 w-full border-b bg-background pt-[env(safe-area-inset-top)] md:hidden">
             <div className="flex h-14 items-center justify-between px-6">
                 <h1 className="text-lg font-bold tracking-tight">{title}</h1>
 
