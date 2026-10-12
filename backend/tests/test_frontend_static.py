@@ -1,9 +1,11 @@
 from fastapi import FastAPI
 from httpx import ASGITransport, AsyncClient
+import pytest
 
 from app.main import SPAStaticFiles
 
 
+@pytest.mark.anyio
 async def test_frontend_routes_fall_back_to_index(tmp_path):
     (tmp_path / "index.html").write_text("<main>ShelfLife</main>")
     (tmp_path / "assets").mkdir()
