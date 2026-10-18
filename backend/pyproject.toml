@@ -1,7 +1,7 @@
 [project]
 name = "backend"
 version = "0.1.0"
-description = "Backend of ShelfLife"
+description = "Backend of FridgePulse"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [

@@ -15,8 +15,8 @@ export default defineConfig({
         enabled: false,
       },
       manifest: {
-        name: "ShelfLife",
-        short_name: "ShelfLife",
+        name: "FridgePulse",
+        short_name: "FridgePulse",
         description: "Track your groceries and reduce food waste!",
         theme_color: "#ffffff",
         background_color: "#ffffff",

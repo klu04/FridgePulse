@@ -37,7 +37,7 @@ export default function AuthLayout() {
   const activeRoute = allRoutes.find(
     (r) => location.pathname === r.to || location.pathname.startsWith(`${r.to}/`)
   );
-  const pageTitle = activeRoute?.label ?? "ShelfLife";
+  const pageTitle = activeRoute?.label ?? "FridgePulse";
   const fabRoutes = ["/dashboard", "/kitchen", "recipes", "/reports"];
   const showFab = fabRoutes.includes(activeRoute?.to);
 

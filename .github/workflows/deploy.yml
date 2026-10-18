@@ -64,7 +64,7 @@ jobs:
         run: uv run ./prestart.sh
         working-directory: backend
         env:
-          PROJECT_NAME: ${{ vars.PROJECT_NAME || 'ShelfLife' }}
+          PROJECT_NAME: ${{ vars.PROJECT_NAME || 'FridgePulse' }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           MIGRATION_DATABASE_URL: ${{ secrets.MIGRATION_DATABASE_URL }}
           FIRST_SUPERUSER_EMAIL: ${{ vars.FIRST_SUPERUSER_EMAIL }}

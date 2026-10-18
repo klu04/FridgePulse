@@ -1,13 +1,12 @@
+import pytest
+from app.main import SPAStaticFiles
 from fastapi import FastAPI
 from httpx import ASGITransport, AsyncClient
-import pytest
-
-from app.main import SPAStaticFiles
 
 
 @pytest.mark.anyio
 async def test_frontend_routes_fall_back_to_index(tmp_path):
-    (tmp_path / "index.html").write_text("<main>ShelfLife</main>")
+    (tmp_path / "index.html").write_text("<main>FridgePulse</main>")
     (tmp_path / "assets").mkdir()
     (tmp_path / "assets" / "app.js").write_text("console.log('app')")
 
@@ -28,7 +27,7 @@ async def test_frontend_routes_fall_back_to_index(tmp_path):
         missing_api_response = await client.get("/api/v1/missing")
 
     assert route_response.status_code == 200
-    assert route_response.text == "<main>ShelfLife</main>"
+    assert route_response.text == "<main>FridgePulse</main>"
     assert asset_response.status_code == 200
     assert asset_response.text == "console.log('app')"
     assert missing_asset_response.status_code == 404

@@ -69,7 +69,7 @@ function LandingPage() {
                     <div className="flex flex-col gap-8 items-center flex-1">
                         <Refrigerator className="size-15 w-25 text-gray-600" />
                         <h1 className="text-center text-2xl font-bold text-gray-600">
-                            ShelfLife
+                            FridgePulse
                         </h1>
                         <p className="text-xl text-center text-gray-600 max-w-2xl">
                             Track your groceries and reduce food waste!

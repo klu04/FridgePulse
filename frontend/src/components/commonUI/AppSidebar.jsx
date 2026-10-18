@@ -34,7 +34,7 @@ export default function AppSidebar() {
         <Sidebar collapsible="icon" className="group hidden md:flex">
             <SidebarHeader className="flex flex-row mb-2 h-16 items-center justify-between gap-2 border-b px-4 group-data-[collapsible=icon]:justify-center">
                 <h2 className="text-lg font-semibold group-data-[collapsible=icon]:hidden">
-                    ShelfLife
+                    FridgePulse
                 </h2>
                 <SidebarTrigger className="-ml-1" />
             </SidebarHeader>
