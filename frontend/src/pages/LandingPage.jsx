@@ -20,8 +20,8 @@ import reportIcon from '../assets/icons/icons8-report-100.png';
 
 const features = [
     {
-        name: "Pantry Management",
-        description: "Add, update, and delete pantry items with details like brand, category, quantity, and expiration date",
+        name: "Grocery Management",
+        description: "Add, update, and delete grocery items with details like brand, category, quantity, and expiration date",
         image: pantryIcon
     },
     {
