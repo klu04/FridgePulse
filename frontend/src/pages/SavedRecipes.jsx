@@ -84,7 +84,7 @@ function SavedRecipes({ refresh }) {
                         <Card key={recipe.id || recipe.name} className="relative w-full min-w-0 pt-0 overflow-hidden gap-0">
                             <div className="absolute inset-0 z-30 aspect-video bg-black/10" />
                             <img
-                                src={recipe.image_url ?? "https://placehold.co/640x360"}
+                                src={recipe.image_url?.trim() || "https://placehold.co/640x360"}
                                 alt={recipe.name}
                                 className="relative z-20 aspect-video w-full object-cover"
                             />

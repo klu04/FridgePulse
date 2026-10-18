@@ -12,7 +12,7 @@ function RectCard({ imageUrl, alt, badge, children, onClick }) {
             <ItemHeader className="relative m-0">
                 {badge}
                 <img
-                    src={imageUrl ?? "https://placehold.co/640x360"}
+                    src={imageUrl?.trim() || "https://placehold.co/640x360"}
                     alt={alt}
                     className="aspect-4/5 w-full object-cover"
                 />

@@ -77,7 +77,7 @@ function Recipes() {
                 {recipes.map((recipe, index) => (
                     <Card key={recipe.name || index} className="relative mx-auto w-full max-w-sm pt-0">
                         <img
-                            src={recipe.image_url ?? "https://placehold.co/640x360"}
+                            src={recipe.image_url?.trim() || "https://placehold.co/640x360"}
                             alt={recipe.name}
                             className="relative aspect-square w-full object-cover"
                         />

@@ -36,7 +36,7 @@ function FoodItemCard({
                 onClick={() => setInfoOpen(true)}
             >
                 <img
-                    src={item.image_url ?? "https://placehold.co/640x360"}
+                    src={item.image_url?.trim() || "https://placehold.co/640x360"}
                     alt={item.name}
                     className="relative z-20 aspect-video w-full object-cover"
                 />

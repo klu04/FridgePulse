@@ -34,7 +34,7 @@ export function ItemDetailsDialog({
                     <DialogTitle>{item.name}</DialogTitle>
                 </DialogHeader>
                 <img
-                    src={item.image_url ?? "https://placehold.co/640x360"}
+                    src={item.image_url?.trim() || "https://placehold.co/640x360"}
                     alt={item.name}
                     className="w-full rounded-md object-cover aspect-video"
                 />
