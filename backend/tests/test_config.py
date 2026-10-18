@@ -16,7 +16,7 @@ def make_settings(**database_settings) -> Settings:
 
 def test_neon_database_url_uses_asyncpg_and_ssl():
     settings = make_settings(
-        DATABASE_URL=(
+        NEON_DATABASE_URL=(
             "postgresql://user:pass@db.example.test/fridgepulse"
             "?sslmode=require&channel_binding=require"
         )
@@ -29,7 +29,7 @@ def test_neon_database_url_uses_asyncpg_and_ssl():
 
 def test_migration_database_url_overrides_runtime_url():
     settings = make_settings(
-        DATABASE_URL=(
+        NEON_DATABASE_URL=(
             "postgresql://user:pass@db-pooler.example.test/fridgepulse"
             "?sslmode=require&channel_binding=require"
         ),
@@ -49,7 +49,7 @@ def test_migration_database_url_overrides_runtime_url():
 
 def test_migration_url_defaults_to_runtime_url():
     settings = make_settings(
-        DATABASE_URL="postgresql://user:pass@db.example.test/fridgepulse",
+        NEON_DATABASE_URL="postgresql://user:pass@db.example.test/fridgepulse",
         MIGRATION_DATABASE_URL=None,
     )
 
@@ -58,7 +58,7 @@ def test_migration_url_defaults_to_runtime_url():
 
 def test_split_postgres_settings_still_build_asyncpg_url():
     settings = make_settings(
-        DATABASE_URL=None,
+        NEON_DATABASE_URL=None,
         POSTGRES_SERVER="localhost",
         POSTGRES_USER="user",
         POSTGRES_PASSWORD="pass",

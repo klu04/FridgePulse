@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     DOMAIN: str = "localhost"
 
     # PostgreSQL database
-    DATABASE_URL: str | None = None
+    NEON_DATABASE_URL: str | None = None
     MIGRATION_DATABASE_URL: str | None = None
     POSTGRES_SERVER: str | None = None
     POSTGRES_PORT: int = 5432
@@ -47,17 +47,17 @@ class Settings(BaseSettings):
     @computed_field
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> str:
-        if self.DATABASE_URL:
-            return self._asyncpg_database_uri(self.DATABASE_URL)
+        if self.NEON_DATABASE_URL:
+            return self._asyncpg_database_uri(self.NEON_DATABASE_URL)
 
         if not self.POSTGRES_SERVER or not self.POSTGRES_USER:
             raise ValueError(
-                "Set DATABASE_URL or POSTGRES_SERVER, POSTGRES_USER, and "
+                "Set NEON_DATABASE_URL or POSTGRES_SERVER, POSTGRES_USER, and "
                 "POSTGRES_PASSWORD"
             )
         if self.POSTGRES_PASSWORD is None:
             raise ValueError(
-                "Set DATABASE_URL or POSTGRES_SERVER, POSTGRES_USER, and "
+                "Set NEON_DATABASE_URL or POSTGRES_SERVER, POSTGRES_USER, and "
                 "POSTGRES_PASSWORD"
             )
 
