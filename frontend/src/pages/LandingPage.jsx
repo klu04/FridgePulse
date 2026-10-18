@@ -17,6 +17,7 @@ import recognitionIcon from '../assets/icons/icons8-grocery-100.png';
 import recipeIcon from '../assets/icons/icons8-recipe-100.png';
 import mobileIcon from '../assets/icons/icons8-mobile-100.png';
 import reportIcon from '../assets/icons/icons8-report-100.png';
+import githubIcon from '../assets/github_icons/GitHub_Invertocat_Black.svg';
 
 const features = [
     {
@@ -114,6 +115,8 @@ function LandingPage() {
                         <a
                             className="underline cursor-pointer hover:text-gray-900"
                             href="https://www.apache.org/licenses/LICENSE-2.0"
+                            target="_blank"
+                            rel="noopener noreferrer"
                         >
                             Apache License, Version 2.0
                         </a>
@@ -123,10 +126,22 @@ function LandingPage() {
                         <a
                             className="underline cursor-pointer hover:text-gray-900"
                             href="https://icons8.com"
+                            target="_blank"
+                            rel="noopener noreferrer"
                         >
                             Icons8
                         </a>
                     </small>
+                    <a
+                        className="inline-flex items-center justify-center text-xs gap-1 hover:text-gray-900"
+                        href="https://github.com/klu04/FridgePulse"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="FridgePulse on GitHub"
+                    >
+                        <img src={githubIcon} alt="" className="size-4" />
+                        GitHub
+                    </a>
                 </div>
             </footer>
         </>
