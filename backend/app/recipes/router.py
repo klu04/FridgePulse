@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth.utils import CurrentUser
+from app.auth.dependencies import CurrentUser
 from app.database.db import get_db
 from app.database.models import FoodItem as FoodItemModel
 from app.database.models import Recipe as RecipeModel

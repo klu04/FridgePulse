@@ -7,7 +7,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.schema import Token
-from app.auth.utils import (
+from app.auth.security import (
     create_access_token,
     verify_password,
 )
