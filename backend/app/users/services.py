@@ -3,7 +3,7 @@ from uuid import UUID
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth.utils import get_password_hash
+from app.auth.security import get_password_hash
 from app.database.models import User as UserModel
 from app.users.exceptions import EmailAlreadyExistsError, UserNotFoundError
 from app.users.schema import UserCreate, UserUpdate

@@ -4,7 +4,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth.utils import CurrentUser
+from app.auth.dependencies import CurrentUser
 from app.config import settings
 from app.database.db import get_db
 from app.users.exceptions import EmailAlreadyExistsError, UserNotFoundError
