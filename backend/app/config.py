@@ -1,7 +1,7 @@
 import secrets
 from pathlib import Path
 
-from pydantic import PostgresDsn, SecretStr, computed_field
+from pydantic import EmailStr, PostgresDsn, SecretStr, computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from sqlalchemy.engine import make_url
 
@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     POSTGRES_DB: str = ""
     POSTGRES_USER: str | None = None
     POSTGRES_PASSWORD: str | None = None
-    FIRST_SUPERUSER_EMAIL: str
+    FIRST_SUPERUSER_EMAIL: EmailStr
     FIRST_SUPERUSER_PASSWORD: str
     USERS_OPEN_REGISTRATION: bool
 
@@ -35,7 +35,6 @@ class Settings(BaseSettings):
     SECRET_KEY: SecretStr = secrets.token_urlsafe(32)
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
-    REFRESH_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
 
     # Frontend
     FRONTEND_HOST: str = "http://localhost:5173"

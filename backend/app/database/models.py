@@ -1,9 +1,9 @@
 import datetime
 from decimal import Decimal
-from typing import List
 from uuid import UUID
 
 import sqlalchemy
+from app.database._model_base import Base
 from sqlalchemy import (
     BigInteger,
     Boolean,
@@ -16,8 +16,6 @@ from sqlalchemy import (
     types,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
-from app.database._model_base import Base
 
 
 class User(Base):
@@ -34,7 +32,7 @@ class User(Base):
         DateTime(timezone=True), server_default=text("now()"), nullable=False
     )
 
-    food_items: Mapped[List["FoodItem"]] = relationship(
+    food_items: Mapped[list["FoodItem"]] = relationship(
         back_populates="owner", cascade="all, delete-orphan"
     )
 
