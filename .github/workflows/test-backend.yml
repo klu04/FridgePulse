@@ -22,7 +22,7 @@ jobs:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       TEST_DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/fridgepulse
-      FIRST_SUPERUSER_EMAIL: admin@example.test
+      FIRST_SUPERUSER_EMAIL: admin@example.com
       FIRST_SUPERUSER_PASSWORD: test-password
       USERS_OPEN_REGISTRATION: "true"
       SPOONACULAR_API_KEY: disabled-in-ci
