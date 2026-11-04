@@ -33,6 +33,12 @@ function Login() {
     return (
         <div className="flex flex-col mx-auto w-full max-w-sm min-h-dvh gap-6 p-6 items-center justify-center">
 
+            <div className="flex flex-col gap-2 px-4 py-2 border bg-blue-500 rounded-md">
+                <p className="text-white">Login with a demo account!</p>
+                <p className="text-white"><strong>Email:</strong> demouser@example.com</p>
+                <p className="text-white"><strong>Password:</strong> DemoPassword</p>
+            </div>
+
             {/* Logo */}
             <Link to="/" className="flex justify-center w-full">
                 <Refrigerator className="w-1/3 h-auto cursor-pointer" />
